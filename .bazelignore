@@ -1,0 +1,6 @@
+.vscode
+bazel-skills
+bazel-bin
+bazel-testlogs
+bazel-out
+bazel-sdk-examples

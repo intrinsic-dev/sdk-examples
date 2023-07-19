@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.example;
+
+import "intrinsic/world/proto/object_world_refs.proto";
+
+message UseWorldParams {
+  // An ObjectReference can be set to any object in the world. It cannot
+  // reference a frame.
+  intrinsic_proto.world.ObjectReference object_ref = 1;
+
+  // A FrameReference can be set to any frame in the world. It cannot reference
+  // an object. Often you'll want a TransformNodeReference instead.
+  intrinsic_proto.world.FrameReference frame_ref = 2;
+
+  // A TransformNodeReference can be set to any object or frame in the world.
+  // Usually this is the right choice if you need "a pose from the world".
+  intrinsic_proto.world.TransformNodeReference transform_node_ref = 3;
+}
+
