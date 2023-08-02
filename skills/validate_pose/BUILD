@@ -35,6 +35,6 @@ py_skill_image(
     package_name = "com.example",
     parameter_proto = ":validate_pose_proto",
     skill = ":validate_pose",
-    skill_module = "validate_pose.validate_pose",
+    skill_module = "skills.validate_pose.validate_pose",
     skill_name = "validate_pose",
 )
