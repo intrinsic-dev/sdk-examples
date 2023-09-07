@@ -2,9 +2,10 @@
 
 from typing import Mapping, cast
 
+from absl import logging
+
 from intrinsic.icon.equipment import equipment_utils
 from intrinsic.math.python import data_types
-import use_world_pb2
 from intrinsic.skills.proto import equipment_pb2
 from intrinsic.skills.proto import skill_service_pb2
 from intrinsic.skills.python import proto_utils
@@ -13,6 +14,8 @@ from intrinsic.util.decorators import overrides
 from intrinsic.world.python import object_world_client
 from intrinsic.world.python import object_world_resources
 from google.protobuf import descriptor
+
+from skills.use_world import use_world_pb2
 
 ROBOT_EQUIPMENT_SLOT: str = "robot"
 CAMERA_EQUIPMENT_SLOT: str = "camera"
@@ -30,7 +33,7 @@ class UseWorld(skill_interface.Skill):
         with_position_controlled_part=True
     )
     camera_selector = equipment_pb2.EquipmentSelector(
-        equipment_type_names=["Config", "GrpcTarget"]
+        equipment_type_names=["CameraConfig"]
     )
     return {
         ROBOT_EQUIPMENT_SLOT: robot_selector,
@@ -40,7 +43,7 @@ class UseWorld(skill_interface.Skill):
   @classmethod
   @overrides(skill_interface.Skill)
   def name(cls) -> str:
-    return "use_world"
+    return "use_world_py"
 
   @classmethod
   @overrides(skill_interface.Skill)
@@ -180,4 +183,3 @@ class UseWorld(skill_interface.Skill):
   @overrides(skill_interface.Skill)
   def get_parameter_descriptor(self) -> descriptor.Descriptor:
     return use_world_pb2.UseWorldParams.DESCRIPTOR
-
