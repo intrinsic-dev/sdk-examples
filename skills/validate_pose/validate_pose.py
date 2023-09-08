@@ -25,7 +25,7 @@ class ValidatePose(skill_interface.Skill):
     @classmethod
     @overrides(skill_interface.Skill)
     def name(cls) -> str:
-        return 'validate_pose'
+        return 'validate_pose_py'
 
 
     @classmethod

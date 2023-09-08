@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package com.example;
+
+message SaySkillParams {
+  // Text to print
+  string text = 1;
+
+  // Time to wait in ms before printing text
+  uint64 wait_ms = 2;
+}

@@ -4,77 +4,71 @@ load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
 proto_library(
-    name = "use_world_proto",
-    srcs = ["use_world.proto"],
-    deps = ["@ai_intrinsic_sdks//intrinsic/world/proto:object_world_refs_proto"],
+    name = "say_skill_proto",
+    srcs = ["say_skill.proto"],
 )
 
 py_proto_library(
-    name = "use_world_proto_py_pb2",
-    deps = [":use_world_proto"],
+    name = "say_skill_py_pb2",
+    deps = [":say_skill_proto"],
 )
 
 py_library(
-    name = "use_world_py",
-    srcs = ["use_world.py"],
+    name = "say_skill_py",
+    srcs = ["say_skill.py"],
     srcs_version = "PY3",
     deps = [
-        ":use_world_proto_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils_py",
-        "@ai_intrinsic_sdks//intrinsic/math/python:data_types",
+        ":say_skill_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
-        "@ai_intrinsic_sdks//intrinsic/world/python:object_world_client",
-        "@ai_intrinsic_sdks//intrinsic/world/python:object_world_resources",
+        "@com_google_absl_py//absl/logging",
         "@com_google_protobuf//:protobuf_python",
     ],
 )
 
 py_skill_image(
-    name = "use_world_image",
+    name = "say_skill_py_image",
     package_name = "com.example",
-    parameter_proto = ":use_world_proto",
-    skill = ":use_world_py",
-    skill_module = "skills.use_world.use_world",
-    skill_name = "use_world_py",
+    parameter_proto = ":say_skill_proto",
+    skill = ":say_skill_py",
+    skill_module = "skills.say_skill.say_skill",
+    skill_name = "say_skill_py",
 )
 
 cc_proto_library(
-    name = "use_world_cc_proto",
-    deps = [":use_world_proto"],
+    name = "say_skill_cc_proto",
+    deps = [":say_skill_proto"],
 )
 
 cc_library(
-    name = "use_world_cc",
-    srcs = ["use_world.cc"],
-    hdrs = ["use_world.h"],
+    name = "say_skill_cc",
+    srcs = ["say_skill.cc"],
+    hdrs = ["say_skill.h"],
     deps = [
-        ":use_world_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils",
-        "@ai_intrinsic_sdks//intrinsic/math:pose3",
-        "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
+        ":say_skill_cc_proto",
+        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_registration",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/world/objects:object_world_client",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/synchronization",
         "@com_google_protobuf//:protobuf",
     ],
     alwayslink = True,
 )
 
 cc_skill_image(
-    name = "use_world_cc_image",
+    name = "say_skill_cc_image",
     package_name = "com.example",
-    parameter_proto = ":use_world_proto",
-    skill = ":use_world_cc",
-    skill_name = "use_world_cc",
+    parameter_proto = ":say_skill_proto",
+    skill = ":say_skill_cc",
+    skill_name = "say_skill_cc",
 )
