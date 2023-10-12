@@ -1,19 +1,16 @@
 """Example skill demonstrating how to use the world service in skills."""
 
-from typing import Mapping, cast
+from typing import cast
 
 from absl import logging
 
-from intrinsic.icon.equipment import equipment_utils
 from intrinsic.math.python import data_types
-from intrinsic.skills.proto import equipment_pb2
 from intrinsic.skills.proto import skill_service_pb2
 from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
 from intrinsic.world.python import object_world_client
 from intrinsic.world.python import object_world_resources
-from google.protobuf import descriptor
 
 from skills.use_world import use_world_pb2
 
@@ -26,48 +23,24 @@ class UseWorld(skill_interface.Skill):
   Queries information from the world and makes some world updates.
   """
 
-  @classmethod
-  @overrides(skill_interface.Skill)
-  def required_equipment(cls) -> Mapping[str, equipment_pb2.EquipmentSelector]:
-    robot_selector = equipment_utils.make_icon_equipment_selector(
-        with_position_controlled_part=True
-    )
-    camera_selector = equipment_pb2.EquipmentSelector(
-        equipment_type_names=["CameraConfig"]
-    )
-    return {
-        ROBOT_EQUIPMENT_SLOT: robot_selector,
-        CAMERA_EQUIPMENT_SLOT: camera_selector,
-    }
-
-  @classmethod
-  @overrides(skill_interface.Skill)
-  def name(cls) -> str:
-    return "use_world_py"
-
-  @classmethod
-  @overrides(skill_interface.Skill)
-  def package(cls) -> str:
-    return "com.example"
-
   @overrides(skill_interface.Skill)
   def execute(
       self,
-      execute_request: skill_service_pb2.ExecuteRequest,
+      request: skill_service_pb2.ExecuteRequest,
       context: skill_interface.ExecutionContext,
   ) -> skill_service_pb2.ExecuteResult:
     # Unpack parameters.
     params = use_world_pb2.UseWorldParams()
-    proto_utils.unpack_any(execute_request.parameters, params)
+    proto_utils.unpack_any(request.parameters, params)
 
     # Get connection to world service.
     world: object_world_client.ObjectWorldClient = context.get_object_world()
 
     # Unpack equipment handles.
-    camera_handle = execute_request.instance.equipment_handles[
+    camera_handle = request.instance.equipment_handles[
         CAMERA_EQUIPMENT_SLOT
     ]
-    robot_handle = execute_request.instance.equipment_handles[
+    robot_handle = request.instance.equipment_handles[
         ROBOT_EQUIPMENT_SLOT
     ]
 
@@ -179,7 +152,3 @@ class UseWorld(skill_interface.Skill):
   # Mock method for an object detection.
   def detect_object(self) -> data_types.Pose3:
     return data_types.Pose3()
-
-  @overrides(skill_interface.Skill)
-  def get_parameter_descriptor(self) -> descriptor.Descriptor:
-    return use_world_pb2.UseWorldParams.DESCRIPTOR

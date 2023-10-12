@@ -1,7 +1,3 @@
-"""A skill that connects to a camera resource and scans all visible barcodes using OpenCV."""
-
-from typing import Mapping, List
-
 from absl import logging
 
 from intrinsic.icon.actions import point_to_point_move_pb2
@@ -13,7 +9,6 @@ from intrinsic.skills.proto import skill_service_pb2
 from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
-from google.protobuf import descriptor
 
 from skills.wiggle_joint import wiggle_joint_pb2
 
@@ -28,46 +23,23 @@ def get_single_part_status(status_response, part_name):
 class WiggleJoint(skill_interface.Skill):
     """Skill that wiggles a single joint on a robot."""
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    @classmethod
-    @overrides(skill_interface.Skill)
-    def required_equipment(cls) -> Mapping[str, equipment_pb2.EquipmentSelector]:
-        return {
-            ROBOT_EQUIPMENT_SLOT: equipment_utils.make_icon_equipment_selector(
-                with_position_controlled_part=True
-            )
-        }
-
-    @classmethod
-    @overrides(skill_interface.Skill)
-    def name(cls) -> str:
-        return "wiggle_joint_py"
-
-    @classmethod
-    @overrides(skill_interface.Skill)
-    def package(cls) -> str:
-        return "com.example"
-
     @overrides(skill_interface.Skill)
     def execute(
         self,
-        execute_request: skill_service_pb2.ExecuteRequest,
+        request: skill_service_pb2.ExecuteRequest,
         context: skill_interface.ExecutionContext,
     ) -> skill_service_pb2.ExecuteResult:
         # Get params.
         params = wiggle_joint_pb2.WiggleJointParams()
-        proto_utils.unpack_any(execute_request.parameters, params)
+        proto_utils.unpack_any(request.parameters, params)
 
         # Get equipment.
         icon_equipment: equipment_pb2.EquipmentHandle = (
-            execute_request.instance.equipment_handles[ROBOT_EQUIPMENT_SLOT]
+            request.instance.equipment_handles[ROBOT_EQUIPMENT_SLOT]
         )
 
         icon_client = equipment_utils.init_icon_client(icon_equipment)
 
-        robot_config = icon_client.get_config()
         part_name = equipment_utils.get_position_part_name(icon_equipment)
         part_status = get_single_part_status(icon_client.get_status(), part_name)
 
@@ -179,8 +151,3 @@ class WiggleJoint(skill_interface.Skill):
 
         execute_result = skill_service_pb2.ExecuteResult()
         return execute_result
-
-    @overrides(skill_interface.Skill)
-    def get_parameter_descriptor(self) -> descriptor.Descriptor:
-        """Returns the descriptor for the parameter that this skill expects."""
-        return wiggle_joint_pb2.WiggleJointParams.DESCRIPTOR

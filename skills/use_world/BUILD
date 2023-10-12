@@ -1,5 +1,4 @@
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill_image")
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "py_skill_image")
+load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
@@ -10,7 +9,7 @@ proto_library(
 )
 
 py_proto_library(
-    name = "use_world_proto_py_pb2",
+    name = "use_world_py_pb2",
     deps = [":use_world_proto"],
 )
 
@@ -19,10 +18,9 @@ py_library(
     srcs = ["use_world.py"],
     srcs_version = "PY3",
     deps = [
-        ":use_world_proto_py_pb2",
+        ":use_world_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils_py",
         "@ai_intrinsic_sdks//intrinsic/math/python:data_types",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
@@ -33,17 +31,30 @@ py_library(
     ],
 )
 
-py_skill_image(
-    name = "use_world_image",
-    package_name = "com.example",
-    parameter_proto = ":use_world_proto",
-    skill = ":use_world_py",
-    skill_module = "skills.use_world.use_world",
-    skill_name = "use_world_py",
+skill_manifest(
+    name = "use_world_py_manifest",
+    src = "use_world_py.manifest.textproto",
+    deps = [":use_world_proto"],
+)
+
+py_skill(
+    name = "use_world_py_image",
+    manifest = ":use_world_py_manifest",
+    proto = ":use_world_proto",
+    deps = [
+        ":use_world_py",
+        ":use_world_py_pb2",
+    ]
 )
 
 cc_proto_library(
     name = "use_world_cc_proto",
+    deps = [":use_world_proto"],
+)
+
+skill_manifest(
+    name = "use_world_cc_manifest",
+    src = "use_world_cc.manifest.textproto",
     deps = [":use_world_proto"],
 )
 
@@ -53,13 +64,10 @@ cc_library(
     hdrs = ["use_world.h"],
     deps = [
         ":use_world_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils",
         "@ai_intrinsic_sdks//intrinsic/math:pose3",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
-        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_registration",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/world/objects:object_world_client",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -71,10 +79,12 @@ cc_library(
     alwayslink = True,
 )
 
-cc_skill_image(
+cc_skill(
     name = "use_world_cc_image",
-    package_name = "com.example",
-    parameter_proto = ":use_world_proto",
-    skill = ":use_world_cc",
-    skill_name = "use_world_cc",
+    manifest = ":use_world_cc_manifest",
+    proto = ":use_world_proto",
+    deps = [
+        ":use_world_cc",
+        ":use_world_cc_proto",
+    ]
 )

@@ -1,5 +1,4 @@
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill_image")
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "py_skill_image")
+load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
@@ -11,6 +10,12 @@ proto_library(
 
 cc_proto_library(
     name = "wiggle_joint_cc_proto",
+    deps = [":wiggle_joint_proto"],
+)
+
+skill_manifest(
+    name = "wiggle_joint_cc_manifest",
+    src = "wiggle_joint_cc.manifest.textproto",
     deps = [":wiggle_joint_proto"],
 )
 
@@ -37,21 +42,21 @@ cc_library(
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_protobuf//:protobuf",
     ],
-    alwayslink = True,
 )
 
-cc_skill_image(
+cc_skill(
     name = "wiggle_joint_cc_image",
-    package_name = "com.example",
-    parameter_proto = ":wiggle_joint_proto",
-    skill = ":wiggle_joint_cc",
-    skill_name = "wiggle_joint_cc",
+    manifest = ":wiggle_joint_cc_manifest",
+    proto = ":wiggle_joint_proto",
+    deps = [
+        ":wiggle_joint_cc",
+        ":wiggle_joint_cc_proto",
+    ]
 )
 
 py_proto_library(
@@ -79,11 +84,18 @@ py_library(
     ],
 )
 
-py_skill_image(
+skill_manifest(
+    name = "wiggle_joint_py_manifest",
+    src = "wiggle_joint_py.manifest.textproto",
+    deps = [":wiggle_joint_proto"],
+)
+
+py_skill(
     name = "wiggle_joint_py_image",
-    package_name = "com.example",
-    parameter_proto = ":wiggle_joint_proto",
-    skill = ":wiggle_joint_py",
-    skill_module = "skills.wiggle_joint.wiggle_joint",
-    skill_name = "wiggle_joint_py",
+    manifest = ":wiggle_joint_py_manifest",
+    proto = ":wiggle_joint_proto",
+    deps = [
+        ":wiggle_joint_py",
+        ":wiggle_joint_py_pb2",
+    ]
 )

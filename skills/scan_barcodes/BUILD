@@ -1,7 +1,8 @@
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "py_skill_image")
+load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@scan_barcodes_pip_deps//:requirements.bzl", "requirement")
+load("@rules_cc//cc:defs.bzl", "cc_proto_library")
 
 proto_library(
     name = "scan_barcodes_proto",
@@ -14,21 +15,17 @@ py_proto_library(
 )
 
 py_library(
-    name = "scan_barcodes",
+    name = "scan_barcodes_py",
     srcs = ["scan_barcodes.py"],
     srcs_version = "PY3",
     deps = [
         ":scan_barcodes_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/perception/proto:camera_config_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/perception/proto:frame_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/perception/service/proto:camera_server_py_pb2_grpc",
+        "@ai_intrinsic_sdks//intrinsic/perception/python/camera:cameras",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
-        "@ai_intrinsic_sdks//intrinsic/util/grpc:connection",
-        "@ai_intrinsic_sdks//intrinsic/util/grpc:interceptor",
         "@com_google_absl_py//absl/logging",
         "@com_google_protobuf//:protobuf_python",
         requirement("numpy"),
@@ -37,14 +34,66 @@ py_library(
     ],
 )
 
-py_skill_image(
-    name = "scan_barcodes_image",
-    package_name = "com.example",
-    parameter_proto = ":scan_barcodes_proto",
-    skill = ":scan_barcodes",
-    skill_module = "skills.scan_barcodes.scan_barcodes",
-    skill_name = "scan_barcodes",
+skill_manifest(
+    name = "scan_barcodes_py_manifest",
+    src = "scan_barcodes_py.manifest.textproto",
+    deps = [":scan_barcodes_proto"],
+)
+
+py_skill(
+    name = "scan_barcodes_py_image",
+    manifest = ":scan_barcodes_py_manifest",
+    proto = ":scan_barcodes_proto",
+    deps = [
+        ":scan_barcodes_py",
+        ":scan_barcodes_py_pb2",
+    ]
 )
 
 # Export for pip_parse repository rule
 exports_files(["requirements.txt"])
+
+cc_proto_library(
+    name = "scan_barcodes_cc_proto",
+    deps = [":scan_barcodes_proto"],
+)
+
+skill_manifest(
+    name = "scan_barcodes_cc_manifest",
+    src = "scan_barcodes_cc.manifest.textproto",
+    deps = [":scan_barcodes_proto"],
+)
+
+cc_library(
+    name = "scan_barcodes_cc",
+    srcs = ["scan_barcodes.cc"],
+    hdrs = ["scan_barcodes.h"],
+    deps = [
+        ":scan_barcodes_cc_proto",
+        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
+        "@ai_intrinsic_sdks//intrinsic/perception/proto:camera_config_cc_proto",
+        "@ai_intrinsic_sdks//intrinsic/perception/service/proto:camera_server_cc_grpc",
+        "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
+        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
+        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
+        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
+        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
+        "@ai_intrinsic_sdks//intrinsic/util/grpc:grpc",
+        "@com_google_absl//absl/log",
+        "@com_google_absl//absl/status:status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_protobuf//:protobuf",
+        "@opencv//:opencv",
+    ],
+)
+
+cc_skill(
+    name = "scan_barcodes_cc_image",
+    manifest = ":scan_barcodes_cc_manifest",
+    proto = ":scan_barcodes_proto",
+    deps = [
+        ":scan_barcodes_cc",
+        ":scan_barcodes_cc_proto",
+    ]
+)
+0

@@ -1,0 +1,28 @@
+id {
+  package: "com.example"
+  name: "wiggle_joint_cc"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Moves one joint on a robot back and fourth 5 degrees."
+}
+options {
+  supports_cancellation: false
+  cc_config {
+    create_skill: "::wiggle_joint::WiggleJoint::CreateSkill"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "robot"
+    value {
+      equipment_type_names: "Icon2Connection"
+      equipment_type_names: "Icon2PositionPart"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.WiggleJointParams"
+}

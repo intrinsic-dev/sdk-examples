@@ -1,5 +1,4 @@
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill_image")
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "py_skill_image")
+load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
@@ -29,17 +28,30 @@ py_library(
     ],
 )
 
-py_skill_image(
+skill_manifest(
+    name = "say_skill_py_manifest",
+    src = "say_skill_py.manifest.textproto",
+    deps = [":say_skill_proto"],
+)
+
+py_skill(
     name = "say_skill_py_image",
-    package_name = "com.example",
-    parameter_proto = ":say_skill_proto",
-    skill = ":say_skill_py",
-    skill_module = "skills.say_skill.say_skill",
-    skill_name = "say_skill_py",
+    manifest = ":say_skill_py_manifest",
+    proto = ":say_skill_proto",
+    deps = [
+        ":say_skill_py",
+        ":say_skill_py_pb2",
+    ]
 )
 
 cc_proto_library(
     name = "say_skill_cc_proto",
+    deps = [":say_skill_proto"],
+)
+
+skill_manifest(
+    name = "say_skill_cc_manifest",
+    src = "say_skill_cc.manifest.textproto",
     deps = [":say_skill_proto"],
 )
 
@@ -51,24 +63,22 @@ cc_library(
         ":say_skill_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
-        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_registration",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/synchronization",
         "@com_google_protobuf//:protobuf",
     ],
-    alwayslink = True,
 )
 
-cc_skill_image(
+cc_skill(
     name = "say_skill_cc_image",
-    package_name = "com.example",
-    parameter_proto = ":say_skill_proto",
-    skill = ":say_skill_cc",
-    skill_name = "say_skill_cc",
+    manifest = ":say_skill_cc_manifest",
+    proto = ":say_skill_proto",
+    deps = [
+        ":say_skill_cc",
+        ":say_skill_cc_proto",
+    ]
 )

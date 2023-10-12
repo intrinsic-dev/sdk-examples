@@ -2,16 +2,13 @@
 
 import numpy
 
-from typing import Mapping
 from absl import logging
 
-from intrinsic.skills.proto import equipment_pb2
 from intrinsic.skills.proto import skill_service_pb2
 from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
 from intrinsic.world.python import object_world_client
-from google.protobuf import descriptor
 
 from skills.validate_pose import validate_pose_pb2
 
@@ -19,37 +16,13 @@ from skills.validate_pose import validate_pose_pb2
 class ValidatePose(skill_interface.Skill):
     """Implementation of the validate_pose skill."""
 
-    def __init__(self) -> None:
-        pass
-
-    @classmethod
     @overrides(skill_interface.Skill)
-    def name(cls) -> str:
-        return 'validate_pose_py'
-
-
-    @classmethod
-    @overrides(skill_interface.Skill)
-    def package(cls) -> str:
-        return 'com.example'
-
-    @classmethod
-    @overrides(skill_interface.Skill)
-    def required_equipment(cls) -> Mapping[str, equipment_pb2.EquipmentSelector]:
-        return {}
-
-    @overrides(skill_interface.Skill)
-    def get_parameter_descriptor(self) -> descriptor.Descriptor:
-        """Returns the descriptor for the parameter that this skill expects."""
-        return validate_pose_pb2.ValidatePoseParams.DESCRIPTOR
-
-    @overrides(skill_interface.Skill)
-    def execute(self, execute_request: skill_service_pb2.ExecuteRequest,
+    def execute(self, request: skill_service_pb2.ExecuteRequest,
                 context: skill_interface.ExecutionContext
                 ) -> skill_service_pb2.ExecuteResult:
         # Unpack input parameter proto into typed Python object.
         params = validate_pose_pb2.ValidatePoseParams()
-        proto_utils.unpack_any(execute_request.parameters, params)
+        proto_utils.unpack_any(request.parameters, params)
         logging.info('Input parameters: %s', params)
 
         # Perform validation.

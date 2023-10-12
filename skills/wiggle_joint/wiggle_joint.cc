@@ -2,13 +2,12 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
-#include "absl/container/flat_hash_map.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "skills/wiggle_joint/wiggle_joint.pb.h"
-#include "google/protobuf/message.h"
 // [START wiggle_joint_includes]
 #include "intrinsic/icon/actions/point_to_point_move_info.h"
 #include "intrinsic/icon/cc_client/client.h"
@@ -18,7 +17,6 @@
 #include "intrinsic/icon/equipment/equipment_utils.h"
 // [END wiggle_joint_includes]
 #include "intrinsic/icon/release/status_helpers.h"
-#include "intrinsic/skills/cc/skill_registration.h"
 #include "intrinsic/skills/cc/skill_utils.h"
 #include "intrinsic/skills/proto/skill_service.pb.h"
 
@@ -26,16 +24,12 @@ namespace wiggle_joint {
 
 using ::com::example::WiggleJointParams;
 
-using ::google::protobuf::Descriptor;
-using ::google::protobuf::Message;
 // [START wiggle_joint_using_directives_p1]
 using ::intrinsic_proto::icon::PartJointState;
 using ::intrinsic_proto::icon::PartStatus;
 // [END wiggle_joint_using_directives_p1]
-using ::intrinsic_proto::skills::EquipmentSelector;
-using ::intrinsic_proto::skills::ExecuteRequest;
+using ::intrinsic::skills::ExecuteRequest;
 using ::intrinsic_proto::skills::ExecuteResult;
-using ::intrinsic_proto::skills::PredictResult;
 // [START wiggle_joint_using_directives_p2]
 using ::intrinsic::icon::Action;
 using ::intrinsic::icon::ActionDescriptor;
@@ -43,7 +37,6 @@ using ::intrinsic::icon::ActionInstanceId;
 using ::intrinsic::icon::ConnectToIconEquipment;
 using ::intrinsic::icon::CreatePointToPointMoveFixedParams;
 using ::intrinsic::icon::DefaultChannelFactory;
-using ::intrinsic::icon::Icon2EquipmentSelectorBuilder;
 using ::intrinsic::icon::IconEquipment;
 using ::intrinsic::icon::IsDone;
 using ::intrinsic::icon::IsGreaterThanOrEqual;
@@ -53,10 +46,7 @@ using ::intrinsic::icon::ReactionDescriptor;
 using ::intrinsic::skills::EquipmentPack;
 // [END wiggle_joint_using_directives_p2]
 using ::intrinsic::skills::SkillInterface;
-using ::intrinsic::skills::SkillProjectInterface;
-using ::intrinsic::skills::ProjectionContext;
-using ::intrinsic::skills::ExecutionContext;
-using ::intrinsic::skills::UnpackParams;
+using ::intrinsic::skills::ExecuteContext;
 
 // [START wiggle_joint_using_directives_p3]
 using IconClient = ::intrinsic::icon::Client;
@@ -70,52 +60,19 @@ std::unique_ptr<SkillInterface> WiggleJoint::CreateSkill() {
   return std::make_unique<WiggleJoint>();
 }
 
-std::string WiggleJoint::Name() const {
-  return kSkillName;
-}
-
-std::string WiggleJoint::Package() const {
-  return "com.example";
-}
-
-std::string WiggleJoint::DocString() const {
-  return "Move one joint on a robot back and fourth 5 degrees.";
-}
-
-// [START declare_equipment]
-absl::flat_hash_map<std::string, EquipmentSelector>
-WiggleJoint::EquipmentRequired() const {
-  return absl::flat_hash_map<std::string,
-                            intrinsic_proto::skills::EquipmentSelector>({
-    {kRobotSlot, Icon2EquipmentSelectorBuilder()
-                          .WithPositionControlledPart()
-                          .Build()},
-  });
-}
-// [END declare_equipment]
-
-const Descriptor* WiggleJoint::GetParameterDescriptor() const {
-  return WiggleJointParams::descriptor();
-}
-
-std::unique_ptr<Message> WiggleJoint::GetDefaultParameters() const {
-  return std::make_unique<WiggleJointParams>();
-}
-
 // -----------------------------------------------------------------------------
 // Skill execution.
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<ExecuteResult> WiggleJoint::Execute(
-    const ExecuteRequest& execute_request, ExecutionContext& context) {
+    const ExecuteRequest& request, ExecuteContext& context) {
 
   // Get parameters.
   INTRINSIC_ASSIGN_OR_RETURN(
-      auto params, UnpackParams<WiggleJointParams>(execute_request));
+    auto params, request.params<WiggleJointParams>());
 
   // [START access_equipment]
-  const EquipmentPack equipment_pack(
-    execute_request.instance().equipment_handles());
+  const EquipmentPack equipment_pack = context.GetEquipment();
   INTRINSIC_ASSIGN_OR_RETURN(const auto equipment, equipment_pack.GetHandle(kRobotSlot));
   // [END access_equipment]
   // [START connect_to_robot]
@@ -246,8 +203,4 @@ absl::StatusOr<ExecuteResult> WiggleJoint::Execute(
 
   return ExecuteResult();
 }
-
-// Register skills.
-REGISTER_SKILL(WiggleJoint, WiggleJoint::kSkillName, &WiggleJoint::CreateSkill);
-
 }  // namespace wiggle_joint

@@ -1,17 +1,13 @@
 #include "use_world.h"
 
 #include <memory>
-#include <string>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "skills/use_world/use_world.pb.h"
-#include "google/protobuf/message.h"
-#include "intrinsic/icon/equipment/equipment_utils.h"
 #include "intrinsic/icon/release/status_helpers.h"
-#include "intrinsic/skills/cc/skill_registration.h"
 #include "intrinsic/skills/cc/skill_utils.h"
 #include "intrinsic/skills/proto/skill_service.pb.h"
 #include "intrinsic/world/objects/object_world_client.h"
@@ -20,21 +16,13 @@ namespace use_world {
 
 using ::com::example::UseWorldParams;
 
-using ::google::protobuf::Descriptor;
-using ::google::protobuf::Message;
-using ::intrinsic_proto::skills::EquipmentSelector;
-using ::intrinsic_proto::skills::ExecuteRequest;
+using ::intrinsic::skills::ExecuteRequest;
 using ::intrinsic_proto::skills::ExecuteResult;
-using ::intrinsic_proto::skills::PredictResult;
 using ::intrinsic::FrameName;
 using ::intrinsic::Pose3d;
-using ::intrinsic::icon::Icon2EquipmentSelectorBuilder;
 using ::intrinsic::skills::EquipmentPack;
 using ::intrinsic::skills::SkillInterface;
-using ::intrinsic::skills::SkillProjectInterface;
-using ::intrinsic::skills::ProjectionContext;
-using ::intrinsic::skills::ExecutionContext;
-using ::intrinsic::skills::UnpackParams;
+using ::intrinsic::skills::ExecuteContext;
 using ::intrinsic::world::Frame;
 using ::intrinsic::world::KinematicObject;
 using ::intrinsic::world::ObjectWorldClient;
@@ -49,61 +37,22 @@ std::unique_ptr<SkillInterface> UseWorld::CreateSkill() {
   return std::make_unique<UseWorld>();
 }
 
-std::string UseWorld::Name() const {
-  return kSkillName;
-}
-
-std::string UseWorld::Package() const {
-  return "com.example";
-}
-
-std::string UseWorld::DocString() const {
-  return "Queries information from the world and makes some world updates.";
-}
-
-absl::flat_hash_map<std::string, EquipmentSelector>
-UseWorld::EquipmentRequired() const {
-    auto camera_selector = EquipmentSelector();
-    camera_selector.add_equipment_type_names("CameraConfig");
-  return absl::flat_hash_map<std::string,
-                            intrinsic_proto::skills::EquipmentSelector>({
-    {kRobotSlot, Icon2EquipmentSelectorBuilder()
-                          .WithPositionControlledPart()
-                          .Build()},
-    {kCameraSlot, camera_selector},
-  });
-}
-
-const Descriptor* UseWorld::GetParameterDescriptor() const {
-  return UseWorldParams::descriptor();
-}
-
-std::unique_ptr<Message> UseWorld::GetDefaultParameters() const {
-  return std::make_unique<UseWorldParams>();
-}
-
-Pose3d UseWorld::DetectObject() {
-  // Pretend to have detected something.
-  return Pose3d();
-}
-
 // -----------------------------------------------------------------------------
 // Skill execution.
 // -----------------------------------------------------------------------------
 
 absl::StatusOr<ExecuteResult> UseWorld::Execute(
-    const ExecuteRequest& execute_request, ExecutionContext& context) {
+    const ExecuteRequest& request, ExecuteContext& context) {
 
   // Get parameters.
   INTRINSIC_ASSIGN_OR_RETURN(
-      auto params, UnpackParams<UseWorldParams>(execute_request));
+    auto params, request.params<UseWorldParams>());
 
   // Get connection to world service.
   INTRINSIC_ASSIGN_OR_RETURN(ObjectWorldClient world, context.GetObjectWorld());
 
   // Unpack equipment handles.
-  const EquipmentPack equipment_pack(
-    execute_request.instance().equipment_handles());
+  const EquipmentPack equipment_pack = context.GetEquipment();
   INTRINSIC_ASSIGN_OR_RETURN(const auto camera_handle, equipment_pack.GetHandle(kCameraSlot));
   INTRINSIC_ASSIGN_OR_RETURN(const auto robot_handle, equipment_pack.GetHandle(kRobotSlot));
 
@@ -200,7 +149,9 @@ absl::StatusOr<ExecuteResult> UseWorld::Execute(
   return ExecuteResult();
 }
 
-// Register skills.
-REGISTER_SKILL(UseWorld, UseWorld::kSkillName, &UseWorld::CreateSkill);
+Pose3d UseWorld::DetectObject() {
+  // Pretend to have detected something.
+  return Pose3d();
+}
 
 }  // namespace use_world

@@ -1,5 +1,4 @@
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill_image")
-load("@ai_intrinsic_sdks//bazel:skills.bzl", "py_skill_image")
+load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
 
@@ -20,7 +19,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":validate_pose_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
@@ -31,17 +29,30 @@ py_library(
     ],
 )
 
-py_skill_image(
+skill_manifest(
+    name = "validate_pose_py_manifest",
+    src = "validate_pose_py.manifest.textproto",
+    deps = [":validate_pose_proto"],
+)
+
+py_skill(
     name = "validate_pose_py_image",
-    package_name = "com.example",
-    parameter_proto = ":validate_pose_proto",
-    skill = ":validate_pose_py",
-    skill_module = "skills.validate_pose.validate_pose",
-    skill_name = "validate_pose_py",
+    manifest = ":validate_pose_py_manifest",
+    proto = ":validate_pose_proto",
+    deps = [
+        ":validate_pose_py",
+        ":validate_pose_py_pb2",
+    ]
 )
 
 cc_proto_library(
     name = "validate_pose_cc_proto",
+    deps = [":validate_pose_proto"],
+)
+
+skill_manifest(
+    name = "validate_pose_cc_manifest",
+    src = "validate_pose_cc.manifest.textproto",
     deps = [":validate_pose_proto"],
 )
 
@@ -53,12 +64,9 @@ cc_library(
         ":validate_pose_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
-        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_registration",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/world/objects:object_world_client",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",
@@ -67,10 +75,12 @@ cc_library(
     alwayslink = True,
 )
 
-cc_skill_image(
+cc_skill(
     name = "validate_pose_cc_image",
-    package_name = "com.example",
-    parameter_proto = ":validate_pose_proto",
-    skill = ":validate_pose_cc",
-    skill_name = "validate_pose_cc",
+    manifest = ":validate_pose_cc_manifest",
+    proto = ":validate_pose_proto",
+    deps = [
+        ":validate_pose_cc",
+        ":validate_pose_cc_proto",
+    ]
 )
