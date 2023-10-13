@@ -1,0 +1,30 @@
+id {
+  package: "com.example"
+  name: "wiggle_joint_py"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Moves one joint on a robot back and fourth 5 degrees."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "skills.wiggle_joint.wiggle_joint"
+    proto_module: "skills.wiggle_joint.wiggle_joint_pb2"
+    create_skill: "skills.wiggle_joint.wiggle_joint.WiggleJoint"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "robot"
+    value {
+      equipment_type_names: "Icon2Connection"
+      equipment_type_names: "Icon2PositionPart"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.WiggleJointParams"
+}

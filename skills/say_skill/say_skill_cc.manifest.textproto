@@ -1,0 +1,21 @@
+id {
+  package: "com.example"
+  name: "say_skill_cc"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Pause before logging a message."
+}
+options {
+  supports_cancellation: true
+  cc_config {
+    create_skill: "::say_skill::SaySkill::CreateSkill"
+  }
+}
+dependencies {
+}
+parameter {
+  message_full_name: "com.example.SaySkillParams"
+}

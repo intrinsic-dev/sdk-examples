@@ -1,0 +1,30 @@
+id {
+  package: "com.example"
+  name: "scan_barcodes_cc"
+}
+vendor {
+  display_name: "Intrinsic Example"
+}
+documentation {
+  doc_string: "Skill that connects to a camera resource and scans all visible barcodes using OpenCV."
+}
+options {
+  supports_cancellation: true
+  cc_config {
+    create_skill: "::scan_barcodes::ScanBarcodes::CreateSkill"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "camera"
+    value {
+      equipment_type_names: "CameraConfig"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.ScanBarcodesParams"
+}
+return_type {
+  message_full_name: "com.example.ScanBarcodesResult"
+}

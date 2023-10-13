@@ -1,0 +1,36 @@
+id {
+  package: "com.example"
+  name: "use_world_py"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Queries information from the world and makes some world updates."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "skills.use_world.use_world"
+    proto_module: "skills.use_world.use_world_pb2"
+    create_skill: "skills.use_world.use_world.UseWorld"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "camera"
+    value {
+      equipment_type_names: "CameraConfig"
+    }
+  }
+  required_equipment {
+    key: "robot"
+    value {
+      equipment_type_names: "Icon2Connection"
+      equipment_type_names: "Icon2PositionPart"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.UseWorldParams"
+}

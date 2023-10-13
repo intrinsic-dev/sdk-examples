@@ -1,0 +1,34 @@
+id {
+  package: "com.example"
+  name: "use_world_cc"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Queries information from the world and makes some world updates."
+}
+options {
+  supports_cancellation: false
+  cc_config {
+    create_skill: "::use_world::UseWorld::CreateSkill"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "camera"
+    value {
+      equipment_type_names: "CameraConfig"
+    }
+  }
+  required_equipment {
+    key: "robot"
+    value {
+      equipment_type_names: "Icon2Connection"
+      equipment_type_names: "Icon2PositionPart"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.UseWorldParams"
+}

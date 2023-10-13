@@ -1,0 +1,21 @@
+id {
+  package: "com.example"
+  name: "say_skill_py"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Waits a configurable period of time and then logs a message."
+}
+options {
+  supports_cancellation: true
+  python_config {
+    skill_module: "skills.say_skill.say_skill"
+    proto_module: "skills.say_skill.say_skill_pb2"
+    create_skill: "skills.say_skill.say_skill.SaySkill"
+  }
+}
+parameter {
+  message_full_name: "com.example.SaySkillParams"
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.example;
+
+import "intrinsic/world/proto/object_world_refs.proto";
+
+message ValidatePoseParams {
+  // Object to be checked.
+  intrinsic_proto.world.TransformNodeReference actual_object = 1;
+
+  // Pose the object to be checked is expected to be in.
+  intrinsic_proto.world.TransformNodeReference expected_pose = 2;
+
+  // Max distance (in meters) between actual object and expected pose.
+  optional double position_tolerance = 3;
+
+  // Max rotation (in radians) around the axis that produces a single,
+  // pure rotation from the actual object to its expected pose.
+  optional double rotation_tolerance = 4;
+}

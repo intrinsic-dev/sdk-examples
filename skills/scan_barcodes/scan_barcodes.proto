@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package com.example;
+
+message ScanBarcodesParams {}
+
+enum BarcodeType {
+  BARCODE_UNSPECIFIED = 0;
+  BARCODE_NONE = 1;
+  BARCODE_EAN_8 = 2;
+  BARCODE_EAN_13 = 3;
+  BARCODE_UPC_A = 4;
+  BARCODE_UPC_E = 5;
+  BARCODE_UPC_EAN_EXTENSION = 6;
+}
+
+message Corner {
+  double x = 1;
+  double y = 2;
+}
+
+message Barcode {
+  BarcodeType type = 1;
+  string data = 2;
+  repeated Corner corners = 3;
+}
+
+message ScanBarcodesResult {
+  repeated Barcode barcodes = 1;
+}

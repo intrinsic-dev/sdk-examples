@@ -1,0 +1,21 @@
+id {
+  package: "com.example"
+  name: "validate_pose_cc"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Validates that a pose is within an expected tolerance."
+}
+options {
+  supports_cancellation: false
+  cc_config {
+    create_skill: "::validate_pose::ValidatePose::CreateSkill"
+  }
+}
+dependencies {
+}
+parameter {
+  message_full_name: "com.example.ValidatePoseParams"
+}

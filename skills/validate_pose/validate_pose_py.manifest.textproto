@@ -1,0 +1,21 @@
+id {
+  package: "com.example"
+  name: "validate_pose_py"
+}
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  doc_string: "Skill that checks if two poses are within a given distance (translation and orientation) of each other."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "skills.validate_pose.validate_pose"
+    proto_module: "skills.validate_pose.validate_pose_pb2"
+    create_skill: "skills.validate_pose.validate_pose.ValidatePose"
+  }
+}
+parameter {
+  message_full_name: "com.example.ValidatePoseParams"
+}
