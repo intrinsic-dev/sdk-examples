@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "validate_pose_py"
 }
+display_name: "Validate pose"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Skill that checks if two poses are within a given distance (translation and orientation) of each other."
+  description: "Skill that checks if two poses are within a given distance (translation and orientation) of each other."
 }
 options {
   supports_cancellation: false

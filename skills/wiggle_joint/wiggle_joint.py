@@ -27,15 +27,12 @@ class WiggleJoint(skill_interface.Skill):
     def execute(
         self,
         request: skill_service_pb2.ExecuteRequest,
-        context: skill_interface.ExecutionContext,
-    ) -> skill_service_pb2.ExecuteResult:
-        # Get params.
-        params = wiggle_joint_pb2.WiggleJointParams()
-        proto_utils.unpack_any(request.parameters, params)
+        context: skill_interface.ExecuteContext,
+    ) -> None:
 
         # Get equipment.
         icon_equipment: equipment_pb2.EquipmentHandle = (
-            request.instance.equipment_handles[ROBOT_EQUIPMENT_SLOT]
+            context.resource_handles[ROBOT_EQUIPMENT_SLOT]
         )
 
         icon_client = equipment_utils.init_icon_client(icon_equipment)
@@ -46,17 +43,17 @@ class WiggleJoint(skill_interface.Skill):
         if part_status is None:
             raise ValueError(f"Could not get status for {part_name}")
 
-        indexTooSmall = params.joint_number < 0
-        indexTooBig = params.joint_number >= len(part_status.joint_states)
+        indexTooSmall = request.params.joint_number < 0
+        indexTooBig = request.params.joint_number >= len(part_status.joint_states)
         if indexTooSmall or indexTooBig:
             raise ValueError(
-                f"Joint {params.joint_number} does not exist"
+                f"Joint {request.params.joint_number} does not exist"
                 f" on {icon_equipment.name}"
             )
 
         five_degrees = 0.0872665  # Radians
         joint_target_pose = (
-            part_status.joint_states[params.joint_number].position_sensed + five_degrees
+            part_status.joint_states[request.params.joint_number].position_sensed + five_degrees
         )
 
         original_positions = joint_space_pb2.JointVec()
@@ -64,7 +61,7 @@ class WiggleJoint(skill_interface.Skill):
         zero_velocity = joint_space_pb2.JointVec()
         for i, cur_state in enumerate(part_status.joint_states):
             cur_pos = cur_state.position_sensed
-            if i == params.joint_number:
+            if i == request.params.joint_number:
                 first_goal_positions.joints.append(joint_target_pose)
             else:
                 first_goal_positions.joints.append(cur_pos)
@@ -148,6 +145,3 @@ class WiggleJoint(skill_interface.Skill):
 
         if not success:
             raise RuntimeError("Failed to wiggle joint")
-
-        execute_result = skill_service_pb2.ExecuteResult()
-        return execute_result

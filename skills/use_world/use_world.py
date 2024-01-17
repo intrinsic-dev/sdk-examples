@@ -27,35 +27,27 @@ class UseWorld(skill_interface.Skill):
   def execute(
       self,
       request: skill_service_pb2.ExecuteRequest,
-      context: skill_interface.ExecutionContext,
-  ) -> skill_service_pb2.ExecuteResult:
-    # Unpack parameters.
-    params = use_world_pb2.UseWorldParams()
-    proto_utils.unpack_any(request.parameters, params)
-
+      context: skill_interface.ExecuteContext,
+  ) -> None:
     # Get connection to world service.
-    world: object_world_client.ObjectWorldClient = context.get_object_world()
+    world: object_world_client.ObjectWorldClient = context.object_world
 
     # Unpack equipment handles.
-    camera_handle = request.instance.equipment_handles[
-        CAMERA_EQUIPMENT_SLOT
-    ]
-    robot_handle = request.instance.equipment_handles[
-        ROBOT_EQUIPMENT_SLOT
-    ]
+    camera_handle = context.resource_handles[CAMERA_EQUIPMENT_SLOT]
+    robot_handle = context.resource_handles[ROBOT_EQUIPMENT_SLOT]
 
     # Resolve ObjectReference.
     obj: object_world_resources.WorldObject = world.get_object(
-        params.object_ref
+        request.params.object_ref
     )
 
     # Resolve FrameReference.
-    frame: object_world_resources.Frame = world.get_frame(params.frame_ref)
+    frame: object_world_resources.Frame = world.get_frame(request.params.frame_ref)
 
     # Resolve TransformNodeReference, obtaining an instance of either
     # WorldObject or Frame.
     obj_or_frame: object_world_resources.TransformNode = (
-        world.get_transform_node(params.transform_node_ref)
+        world.get_transform_node(request.params.transform_node_ref)
     )
 
     logging.info(obj.name)
@@ -80,6 +72,13 @@ class UseWorld(skill_interface.Skill):
     )
 
     logging.info(robot_kinematic_obj.joint_positions)
+
+    # Update the robot joints, operating on the robot in the belief world.
+    # Note the values in this example are valid only for a UR3e robot.
+    world.update_joint_positions(
+        robot_kinematic_obj,
+        [1, -1.725, 1.111, -1.219, -1.523, 3.14]
+    )
 
     # WorldObject representing the world origin. Always present.
     root_object = cast(object_world_resources.WorldObject, world.root)
@@ -118,7 +117,7 @@ class UseWorld(skill_interface.Skill):
 
     # Get a fresh snapshot of the object ('obj' is just a local snapshot and
     # does not get updated automatically!).
-    obj_new = world.get_object(params.object_ref)
+    obj_new = world.get_object(request.params.object_ref)
 
     # Prints: Pose3(Rotation3([0i + 0j + 0k + 1]),[1. 2. 3.])
     logging.info(obj_new.parent_t_this)
@@ -133,22 +132,18 @@ class UseWorld(skill_interface.Skill):
     #       |
     # 'camera.sensor' (Frame)
 
-    estimated_sensor_t_obj: data_types.Pose3 = self.detect_object()
+    # Pretend the pose came from detecting the object in an image from the
+    # camera.
+    observed_sensor_t_obj = data_types.Pose3(translation=[-1.0, -2.0, -3.0])
 
     # Update root_t_obj (= 'obj.parent_t_this') such that sensor_t_obj becomes
-    # equal to 'estimated_sensor_t_obj'. The chain of transforms from the root
+    # equal to 'observed_sensor_t_obj'. The chain of transforms from the root
     # object to the sensor object will not be modified, i.e., we are just moving
     # the object 'obj' and not the camera or the robot.
     world.update_transform(
         node_a=camera_obj.sensor,
         node_b=obj,
-        a_t_b=estimated_sensor_t_obj,
+        a_t_b=observed_sensor_t_obj,
         # Supports any node on the path from 'node_a' to 'node_b'.
         node_to_update=obj,
     )
-
-    return skill_service_pb2.ExecuteResult()
-
-  # Mock method for an object detection.
-  def detect_object(self) -> data_types.Pose3:
-    return data_types.Pose3()

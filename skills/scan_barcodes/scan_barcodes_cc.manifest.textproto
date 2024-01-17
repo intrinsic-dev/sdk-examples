@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "scan_barcodes_cc"
 }
+display_name: "Scan barcodes"
 vendor {
   display_name: "Intrinsic Example"
 }
 documentation {
-  doc_string: "Skill that connects to a camera resource and scans all visible barcodes using OpenCV."
+  description: "Skill that connects to a camera resource and scans all visible barcodes using OpenCV."
 }
 options {
   supports_cancellation: true
@@ -18,7 +19,7 @@ dependencies {
   required_equipment {
     key: "camera"
     value {
-      equipment_type_names: "CameraConfig"
+      capability_names: "CameraConfig"
     }
   }
 }

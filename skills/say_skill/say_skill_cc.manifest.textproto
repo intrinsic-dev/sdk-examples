@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "say_skill_cc"
 }
+display_name: "Say skill"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Pause before logging a message."
+  description: "Pause before logging a message."
 }
 options {
   supports_cancellation: true

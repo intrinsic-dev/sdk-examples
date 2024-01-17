@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "use_world_py"
 }
+display_name: "Use world"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Queries information from the world and makes some world updates."
+  description: "Queries information from the world and makes some world updates."
 }
 options {
   supports_cancellation: false
@@ -20,14 +21,14 @@ dependencies {
   required_equipment {
     key: "camera"
     value {
-      equipment_type_names: "CameraConfig"
+      capability_names: "CameraConfig"
     }
   }
   required_equipment {
     key: "robot"
     value {
-      equipment_type_names: "Icon2Connection"
-      equipment_type_names: "Icon2PositionPart"
+      capability_names: "Icon2Connection"
+      capability_names: "Icon2PositionPart"
     }
   }
 }

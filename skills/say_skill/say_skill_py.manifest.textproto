@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "say_skill_py"
 }
+display_name: "Say skill"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Waits a configurable period of time and then logs a message."
+  description: "Waits a configurable period of time and then logs a message."
 }
 options {
   supports_cancellation: true

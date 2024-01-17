@@ -21,7 +21,6 @@ py_library(
         ":use_world_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils_py",
         "@ai_intrinsic_sdks//intrinsic/math/python:data_types",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
@@ -47,6 +46,16 @@ py_skill(
     ]
 )
 
+py_test(
+    name = "use_world_py_test",
+    srcs = ["use_world_test.py"],
+    deps = [
+        ":use_world_py",
+    ],
+    main = "use_world_test.py",
+    size = "small",
+)
+
 cc_proto_library(
     name = "use_world_cc_proto",
     deps = [":use_world_proto"],
@@ -68,9 +77,7 @@ cc_library(
         "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/world/objects:object_world_client",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",

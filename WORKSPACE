@@ -19,7 +19,7 @@ load("@ai_intrinsic_sdks//bazel:deps_3.bzl", "intrinsic_sdks_deps_3")
 intrinsic_sdks_deps_3()
 
 # [START load_python_rules]
-load("@ai_intrinsic_sdks//bazel:python.bzl", "interpreter")
+load("@local_config_python//:defs.bzl", "interpreter")
 load("@rules_python//python:pip.bzl", "pip_parse")
 # [END load_python_rules]
 
