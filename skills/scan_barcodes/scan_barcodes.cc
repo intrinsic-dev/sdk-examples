@@ -8,7 +8,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "skills/scan_barcodes/scan_barcodes.pb.h"
-#include "intrinsic/icon/release/status_helpers.h"
+#include "intrinsic/util/status/status_macros.h"
 #include "intrinsic/perception/proto/camera_config.pb.h"
 #include "intrinsic/perception/service/proto/camera_server.grpc.pb.h"
 #include "intrinsic/skills/cc/skill_utils.h"
@@ -23,9 +23,7 @@ using ::com::example::ScanBarcodesResult;
 using ::com::example::BarcodeType;
 
 using ::intrinsic_proto::perception::CameraConfig;
-using ::intrinsic_proto::skills::EquipmentSelector;
 using ::intrinsic::skills::ExecuteRequest;
-using ::intrinsic_proto::skills::ExecuteResult;
 using ::intrinsic_proto::skills::PredictResult;
 using ::intrinsic::skills::EquipmentPack;
 using ::intrinsic::skills::SkillInterface;
@@ -67,29 +65,29 @@ std::unique_ptr<SkillInterface> ScanBarcodes::CreateSkill() {
 // Skill execution.
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<ExecuteResult> ScanBarcodes::Execute(
+absl::StatusOr<std::unique_ptr<google::protobuf::Message>> ScanBarcodes::Execute(
     const ExecuteRequest& request, ExecuteContext& context) {
 
   // Get parameters.
-  INTRINSIC_ASSIGN_OR_RETURN(
+  INTR_ASSIGN_OR_RETURN(
     auto params, request.params<ScanBarcodesParams>());
 
   // Get equipment.
-  const EquipmentPack equipment_pack = context.GetEquipment();
-  INTRINSIC_ASSIGN_OR_RETURN(const auto camera_equipment, equipment_pack.GetHandle(kCameraSlot));
+  const EquipmentPack equipment_pack = context.equipment();
+  INTR_ASSIGN_OR_RETURN(const auto camera_equipment, equipment_pack.GetHandle(kCameraSlot));
 
   intrinsic_proto::perception::CameraConfig camera_config;
-  camera_equipment.equipment_data().at("CameraConfig").contents().UnpackTo(&camera_config);
+  camera_equipment.resource_data().at("CameraConfig").contents().UnpackTo(&camera_config);
 
   // Connect to the camera over gRPC.
   std::unique_ptr<intrinsic_proto::perception::CameraServer::Stub> camera_stub;
   std::string camera_handle;
-  INTRINSIC_RETURN_IF_ERROR(ConnectToCamera(
+  INTR_RETURN_IF_ERROR(ConnectToCamera(
     camera_equipment.connection_info().grpc(), camera_config,
     &camera_stub, &camera_handle));
 
   // Get a frame from the camera.
-  INTRINSIC_ASSIGN_OR_RETURN(intrinsic_proto::perception::Frame frame,
+  INTR_ASSIGN_OR_RETURN(intrinsic_proto::perception::Frame frame,
     GrabFrame(camera_equipment.connection_info().grpc(), camera_stub.get(), camera_handle));
 
   // Convert to cv::Mat.
@@ -107,26 +105,23 @@ absl::StatusOr<ExecuteResult> ScanBarcodes::Execute(
   std::vector<std::string> decoded_type;
   std::vector<std::string> decoded_data;
 
-  ScanBarcodesResult result;
-
   try {
-    if (detector_.detectAndDecodeWithType(img, decoded_data, decoded_type, detected_corners)) {
-      INTRINSIC_ASSIGN_OR_RETURN(result, ConvertToResultProto(decoded_data, decoded_type, detected_corners));
-    }
+    detector_.detectAndDecodeWithType(img, decoded_data, decoded_type, detected_corners);
   } catch (const cv::Exception& e) {
     LOG(ERROR) << e.what();
     return absl::UnknownError(e.what());
   }
 
+  std::unique_ptr<ScanBarcodesResult> result;
+  INTR_ASSIGN_OR_RETURN(result, ConvertToResultProto(decoded_data, decoded_type, detected_corners));
+
   LOG(INFO) << "Detected " << decoded_data.size() << " barcode(s).";
-  ExecuteResult execute_result;
-  execute_result.mutable_result()->PackFrom(result);
-  return execute_result;
+  return result;
 }
 
 absl::Status
 ScanBarcodes::ConnectToCamera(
-  const intrinsic_proto::skills::EquipmentGrpcConnectionInfo& grpc_info,
+  const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
   const intrinsic_proto::perception::CameraConfig& camera_config,
   std::unique_ptr<intrinsic_proto::perception::CameraServer::Stub>* camera_stub,
   std::string* camera_handle)
@@ -140,7 +135,7 @@ ScanBarcodes::ConnectToCamera(
   options.SetMaxReceiveMessageSize(kMaxReceiveMessageSize);
   auto camera_channel = grpc::CreateCustomChannel(camera_grpc_address, grpc::InsecureChannelCredentials(), options);
 
-  INTRINSIC_RETURN_IF_ERROR(
+  INTR_RETURN_IF_ERROR(
     WaitForChannelConnected(camera_server_instance, camera_channel, absl::InfiniteFuture()));
 
   *camera_stub = intrinsic_proto::perception::CameraServer::NewStub(camera_channel);
@@ -155,7 +150,7 @@ ScanBarcodes::ConnectToCamera(
   intrinsic_proto::perception::CreateCameraRequest create_request;
   intrinsic_proto::perception::CreateCameraResponse create_response;
   *create_request.mutable_camera_config() = camera_config;
-  INTRINSIC_RETURN_IF_ERROR((*camera_stub)->CreateCamera(client_context.get(), create_request, &create_response));
+  INTR_RETURN_IF_ERROR((*camera_stub)->CreateCamera(client_context.get(), create_request, &create_response));
 
   *camera_handle = create_response.camera_handle();
 
@@ -164,7 +159,7 @@ ScanBarcodes::ConnectToCamera(
 
 absl::StatusOr<intrinsic_proto::perception::Frame>
 ScanBarcodes::GrabFrame(
-  const intrinsic_proto::skills::EquipmentGrpcConnectionInfo& grpc_info,
+  const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
   intrinsic_proto::perception::CameraServer::Stub* camera_stub,
   const std::string& camera_handle)
 {
@@ -182,17 +177,17 @@ ScanBarcodes::GrabFrame(
   frame_request.mutable_timeout()->set_seconds(5);
   frame_request.mutable_post_processing()->set_skip_undistortion(false);
   intrinsic_proto::perception::GetFrameResponse frame_response;
-  INTRINSIC_RETURN_IF_ERROR(camera_stub->GetFrame(client_context.get(), frame_request, &frame_response));
+  INTR_RETURN_IF_ERROR(camera_stub->GetFrame(client_context.get(), frame_request, &frame_response));
   return std::move(*frame_response.mutable_frame());
 }
 
-absl::StatusOr<ScanBarcodesResult>
+absl::StatusOr<std::unique_ptr<ScanBarcodesResult>>
 ScanBarcodes::ConvertToResultProto(
   std::vector<std::string> decoded_data,
   std::vector<std::string> decoded_types,
   std::vector<cv::Point2f> detected_corners)
 {
-  ScanBarcodesResult result;
+  auto result = std::make_unique<ScanBarcodesResult>();
 
   constexpr int kNumCorners = 4;
 
@@ -207,7 +202,7 @@ ScanBarcodes::ConvertToResultProto(
     const std::string& barcode_type = decoded_types.at(d);
     auto corners_iter = detected_corners.begin() + (d * kNumCorners);
 
-    ::com::example::Barcode*  barcode = result.add_barcodes();
+    ::com::example::Barcode*  barcode = result->add_barcodes();
     barcode->set_type(ConvertBarcodeTypeToProto(barcode_type));
     barcode->set_data(barcode_data);
     

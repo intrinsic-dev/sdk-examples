@@ -20,9 +20,6 @@ import numpy as np
 from intrinsic.perception.python.camera import cameras
 
 # [END import_cameras]
-from intrinsic.skills.proto import equipment_pb2
-from intrinsic.skills.proto import skill_service_pb2
-from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
 
@@ -39,17 +36,15 @@ def convert_barcode_type_to_proto(
     barcode_type: int,
 ) -> scan_barcodes_pb2.BarcodeType:
     """Convert cv2 barcode type to BarcodeType proto."""
-    if barcode_type == cv2.barcode.NONE:
-        return scan_barcodes_pb2.BARCODE_NONE
-    elif barcode_type == cv2.barcode.EAN_8:
+    if barcode_type == "EAN_8":
         return scan_barcodes_pb2.BARCODE_EAN_8
-    elif barcode_type == cv2.barcode.EAN_13:
+    elif barcode_type == "EAN_13":
         return scan_barcodes_pb2.BARCODE_EAN_13
-    elif barcode_type == cv2.barcode.UPC_A:
+    elif barcode_type == "UPC_A":
         return scan_barcodes_pb2.BARCODE_UPC_A
-    elif barcode_type == cv2.barcode.UPC_E:
+    elif barcode_type == "UPC_E":
         return scan_barcodes_pb2.BARCODE_UPC_E
-    elif barcode_type == cv2.barcode.UPC_EAN_EXTENSION:
+    elif barcode_type == "UPC_EAN_EXTENSION":
         return scan_barcodes_pb2.BARCODE_UPC_EAN_EXTENSION
     else:
         return scan_barcodes_pb2.BARCODE_UNSPECIFIED
@@ -60,11 +55,11 @@ def convert_barcode_type_to_proto(
 class ScanBarcodes(skill_interface.Skill):
     """Skill that connects to a camera resource and scans all visible barcodes using OpenCV."""
 
-    detector: cv2.barcode_BarcodeDetector
+    detector: cv2.barcode.BarcodeDetector
 
     def __init__(self) -> None:
         super().__init__()
-        self.detector = cv2.barcode_BarcodeDetector()
+        self.detector = cv2.barcode.BarcodeDetector()
         # [END barcode_detector]
 
     # [START access_equipment]
@@ -72,8 +67,8 @@ class ScanBarcodes(skill_interface.Skill):
     def execute(
         self,
         request: skill_interface.ExecuteRequest[scan_barcodes_pb2.ScanBarcodesParams],
-        context: skill_interface.ExecutionContext,
-    ) -> skill_service_pb2.ExecuteResult:
+        context: skill_interface.ExecuteContext,
+    ) -> scan_barcodes_pb2.ScanBarcodesResult:
         # Get camera.
         camera = cameras.Camera.create(context, CAMERA_EQUIPMENT_SLOT)
         # [END access_equipment]
@@ -91,7 +86,7 @@ class ScanBarcodes(skill_interface.Skill):
             decoded_data,
             decoded_types,
             detected_corners,
-        ) = self.detector.detectAndDecode(img)
+        ) = self.detector.detectAndDecodeWithType(img)
         # [END run_detector]
 
         # [START call_convert_to_result_proto]
@@ -104,9 +99,7 @@ class ScanBarcodes(skill_interface.Skill):
         logging.info("ScanBarcodesResult: %s", result)
 
         # [START execute_result]
-        execute_result = skill_service_pb2.ExecuteResult()
-        execute_result.result.Pack(result)
-        return execute_result
+        return result
         # [END execute_result]
 
     # [START convert_to_result_proto]
@@ -122,9 +115,6 @@ class ScanBarcodes(skill_interface.Skill):
 
         barcodes: List[scan_barcodes_pb2.Barcode] = []
         for i, barcode_type in enumerate(decoded_types):
-            if barcode_type == cv2.barcode.NONE:
-                continue
-
             barcode_data = decoded_data[i]
             barcode_corners = detected_corners[i]
 

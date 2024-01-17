@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "validate_pose_cc"
 }
+display_name: "Validate pose"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Validates that a pose is within an expected tolerance."
+  description: "Validates that a pose is within an expected tolerance."
 }
 options {
   supports_cancellation: false

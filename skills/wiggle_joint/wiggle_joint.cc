@@ -16,7 +16,7 @@
 #include "intrinsic/icon/equipment/channel_factory.h"
 #include "intrinsic/icon/equipment/equipment_utils.h"
 // [END wiggle_joint_includes]
-#include "intrinsic/icon/release/status_helpers.h"
+#include "intrinsic/util/status/status_macros.h"
 #include "intrinsic/skills/cc/skill_utils.h"
 #include "intrinsic/skills/proto/skill_service.pb.h"
 
@@ -64,30 +64,30 @@ std::unique_ptr<SkillInterface> WiggleJoint::CreateSkill() {
 // Skill execution.
 // -----------------------------------------------------------------------------
 
-absl::StatusOr<ExecuteResult> WiggleJoint::Execute(
+absl::StatusOr<std::unique_ptr<google::protobuf::Message>> WiggleJoint::Execute(
     const ExecuteRequest& request, ExecuteContext& context) {
 
   // Get parameters.
-  INTRINSIC_ASSIGN_OR_RETURN(
+  INTR_ASSIGN_OR_RETURN(
     auto params, request.params<WiggleJointParams>());
 
   // [START access_equipment]
-  const EquipmentPack equipment_pack = context.GetEquipment();
-  INTRINSIC_ASSIGN_OR_RETURN(const auto equipment, equipment_pack.GetHandle(kRobotSlot));
+  const EquipmentPack equipment_pack = context.equipment();
+  INTR_ASSIGN_OR_RETURN(const auto equipment, equipment_pack.GetHandle(kRobotSlot));
   // [END access_equipment]
   // [START connect_to_robot]
-  INTRINSIC_ASSIGN_OR_RETURN(IconEquipment icon_equipment,
+  INTR_ASSIGN_OR_RETURN(IconEquipment icon_equipment,
     ConnectToIconEquipment(equipment_pack, kRobotSlot, DefaultChannelFactory()));
   IconClient icon_client(icon_equipment.channel);
   // [END connect_to_robot]
   // [START get_robot_info]
-  INTRINSIC_ASSIGN_OR_RETURN(auto robot_config, icon_client.GetConfig());
+  INTR_ASSIGN_OR_RETURN(auto robot_config, icon_client.GetConfig());
 
    const std::string part_name = icon_equipment.position_part_name.value();
-  INTRINSIC_ASSIGN_OR_RETURN(intrinsic_proto::icon::GenericPartConfig part_config,
+  INTR_ASSIGN_OR_RETURN(intrinsic_proto::icon::GenericPartConfig part_config,
                    robot_config.GetGenericPartConfig(part_name));
 
-  INTRINSIC_ASSIGN_OR_RETURN(const PartStatus part_status,
+  INTR_ASSIGN_OR_RETURN(const PartStatus part_status,
                    icon_client.GetSinglePartStatus(part_name));
   // [END get_robot_info]
   // [START parameter_validation]
@@ -123,7 +123,7 @@ absl::StatusOr<ExecuteResult> WiggleJoint::Execute(
 
   // [START start_icon_session]
   // Start an icon session
-  INTRINSIC_ASSIGN_OR_RETURN(
+  INTR_ASSIGN_OR_RETURN(
     std::unique_ptr<IconSession> icon_session,
     IconSession::Start(icon_equipment.channel, {std::string(part_name)}));
   // [END start_icon_session]
@@ -188,19 +188,19 @@ absl::StatusOr<ExecuteResult> WiggleJoint::Execute(
   // [END second_icon_action]
 
   // [START add_icon_actions]
-  INTRINSIC_ASSIGN_OR_RETURN(
+  INTR_ASSIGN_OR_RETURN(
     auto actions,
     icon_session->AddActions({first_move, second_move}));
   // [END add_icon_actions]
 
   // [START move_the_robot]
   LOG(INFO) << "Starting Wiggle.";
-  INTRINSIC_RETURN_IF_ERROR(
+  INTR_RETURN_IF_ERROR(
     icon_session->StartActions({actions.front()}));
-  INTRINSIC_RETURN_IF_ERROR(icon_session->RunWatcherLoop());
+  INTR_RETURN_IF_ERROR(icon_session->RunWatcherLoop());
   LOG(INFO) << "Finished Wiggle.";
   // [END move_the_robot]
 
-  return ExecuteResult();
+  return nullptr;
 }
 }  // namespace wiggle_joint

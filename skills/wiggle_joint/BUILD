@@ -33,15 +33,12 @@ cc_library(
         "@ai_intrinsic_sdks//intrinsic/icon/equipment:channel_factory",
         "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils",
         # [END build_bazel_deps_p1]
-        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
+        "@ai_intrinsic_sdks//intrinsic/util/status:status_macros",
         # [START build_bazel_deps_p2]
         "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
         # [END build_bazel_deps_p2]
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
-        "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_registration",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",
@@ -74,8 +71,6 @@ py_library(
         "@ai_intrinsic_sdks//intrinsic/icon/equipment:equipment_utils_py",
         "@ai_intrinsic_sdks//intrinsic/icon/proto:joint_space_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/icon/python:icon",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
@@ -98,4 +93,14 @@ py_skill(
         ":wiggle_joint_py",
         ":wiggle_joint_py_pb2",
     ]
+)
+
+py_test(
+    name = "wiggle_joint_py_test",
+    srcs = ["wiggle_joint_test.py"],
+    deps = [
+        ":wiggle_joint_py",
+    ],
+    main = "wiggle_joint_test.py",
+    size = "small",
 )

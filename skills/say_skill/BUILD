@@ -18,8 +18,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":say_skill_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
@@ -44,6 +42,16 @@ py_skill(
     ]
 )
 
+py_test(
+    name = "say_skill_py_test",
+    srcs = ["say_skill_test.py"],
+    deps = [
+        ":say_skill_py",
+    ],
+    main = "say_skill_test.py",
+    size = "small",
+)
+
 cc_proto_library(
     name = "say_skill_cc_proto",
     deps = [":say_skill_proto"],
@@ -61,10 +69,9 @@ cc_library(
     hdrs = ["say_skill.h"],
     deps = [
         ":say_skill_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
+        "@ai_intrinsic_sdks//intrinsic/util/status:status_macros",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",
         "@com_google_absl//absl/status:statusor",

@@ -19,7 +19,6 @@ py_library(
     srcs_version = "PY3",
     deps = [
         ":validate_pose_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
@@ -45,6 +44,17 @@ py_skill(
     ]
 )
 
+py_test(
+    name = "validate_pose_py_test",
+    srcs = ["validate_pose_test.py"],
+    deps = [
+        "@ai_intrinsic_sdks//intrinsic/math/python:pose3",
+        ":validate_pose_py",
+    ],
+    main = "validate_pose_test.py",
+    size = "small",
+)
+
 cc_proto_library(
     name = "validate_pose_cc_proto",
     deps = [":validate_pose_proto"],
@@ -62,10 +72,9 @@ cc_library(
     hdrs = ["validate_pose.h"],
     deps = [
         ":validate_pose_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
+        "@ai_intrinsic_sdks//intrinsic/util/status:status_macros",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/world/objects:object_world_client",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",

@@ -26,12 +26,9 @@ class UseWorld : public intrinsic::skills::SkillInterface {
   // ---------------------------------------------------------------------------
 
   // Called once each time the skill is executed in a process.
-  absl::StatusOr<intrinsic_proto::skills::ExecuteResult>
+  absl::StatusOr<std::unique_ptr<google::protobuf::Message>>
   Execute(const intrinsic::skills::ExecuteRequest& request,
           intrinsic::skills::ExecuteContext& context) override;
-
-  // Mock method for an object detection.
-  intrinsic::Pose3d DetectObject();
 };
 
 }  // namespace use_world

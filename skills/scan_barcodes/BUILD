@@ -21,8 +21,6 @@ py_library(
     deps = [
         ":scan_barcodes_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/perception/python/camera:cameras",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_py_pb2",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_py_pb2",
         "@ai_intrinsic_sdks//intrinsic/skills/python:proto_utils",
         "@ai_intrinsic_sdks//intrinsic/skills/python:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/util:decorators",
@@ -50,6 +48,21 @@ py_skill(
     ]
 )
 
+py_test(
+    name = "scan_barcodes_py_test",
+    srcs = ["scan_barcodes_test.py"],
+    deps = [
+        ":scan_barcodes_py",
+        "@rules_python//python/runfiles",
+    ],
+    data = [
+        "test/EAN-8_0123456.png",
+    ],
+    main = "scan_barcodes_test.py",
+    size = "small",
+)
+
+
 # Export for pip_parse repository rule
 exports_files(["requirements.txt"])
 
@@ -70,14 +83,12 @@ cc_library(
     hdrs = ["scan_barcodes.h"],
     deps = [
         ":scan_barcodes_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/icon/release:status_helpers",
+        "@ai_intrinsic_sdks//intrinsic/util/status:status_macros",
         "@ai_intrinsic_sdks//intrinsic/perception/proto:camera_config_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/perception/service/proto:camera_server_cc_grpc",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:equipment_pack",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_interface",
         "@ai_intrinsic_sdks//intrinsic/skills/cc:skill_utils",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:equipment_cc_proto",
-        "@ai_intrinsic_sdks//intrinsic/skills/proto:skill_service_cc_proto",
         "@ai_intrinsic_sdks//intrinsic/util/grpc:grpc",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status:status",

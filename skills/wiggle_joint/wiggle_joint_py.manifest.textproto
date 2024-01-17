@@ -2,11 +2,12 @@ id {
   package: "com.example"
   name: "wiggle_joint_py"
 }
+display_name: "Wiggle joint"
 vendor {
   display_name: "Intrinsic"
 }
 documentation {
-  doc_string: "Moves one joint on a robot back and fourth 5 degrees."
+  description: "Moves one joint on a robot back and fourth 5 degrees."
 }
 options {
   supports_cancellation: false
@@ -20,8 +21,8 @@ dependencies {
   required_equipment {
     key: "robot"
     value {
-      equipment_type_names: "Icon2Connection"
-      equipment_type_names: "Icon2PositionPart"
+      capability_names: "Icon2Connection"
+      capability_names: "Icon2PositionPart"
     }
   }
 }

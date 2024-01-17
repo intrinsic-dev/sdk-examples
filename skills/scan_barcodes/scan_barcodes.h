@@ -32,25 +32,25 @@ class ScanBarcodes : public intrinsic::skills::SkillInterface {
   // ---------------------------------------------------------------------------
 
   // Called once each time the skill is executed in a process.
-  absl::StatusOr<intrinsic_proto::skills::ExecuteResult>
+  absl::StatusOr<std::unique_ptr<google::protobuf::Message>>
   Execute(const intrinsic::skills::ExecuteRequest& request,
           intrinsic::skills::ExecuteContext& context) override;
 
  private:
   absl::Status
   ConnectToCamera(
-    const intrinsic_proto::skills::EquipmentGrpcConnectionInfo& grpc_info,
+    const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
     const intrinsic_proto::perception::CameraConfig& camera_config,
     std::unique_ptr<intrinsic_proto::perception::CameraServer::Stub>* camera_stub,
     std::string* camera_handle);
 
   absl::StatusOr<intrinsic_proto::perception::Frame>
   GrabFrame(
-    const intrinsic_proto::skills::EquipmentGrpcConnectionInfo& grpc_info,
+    const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
     intrinsic_proto::perception::CameraServer::Stub* camera_stub,
     const std::string& camera_handle);
 
-  absl::StatusOr<com::example::ScanBarcodesResult>
+  absl::StatusOr<std::unique_ptr<::com::example::ScanBarcodesResult>>
   ConvertToResultProto(
     std::vector<std::string> decoded_data,
     std::vector<std::string> decoded_types,
