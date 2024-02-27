@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package com.intrinsic;
+import "intrinsic/icon/proto/joint_space.proto";
+
+message WriteJointPositionsToOpcuaEquipmentParams {}

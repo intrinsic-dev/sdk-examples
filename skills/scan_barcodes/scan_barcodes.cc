@@ -8,6 +8,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "skills/scan_barcodes/scan_barcodes.pb.h"
+#include "intrinsic/util/status/status_conversion_grpc.h"
 #include "intrinsic/util/status/status_macros.h"
 #include "intrinsic/perception/proto/camera_config.pb.h"
 #include "intrinsic/perception/service/proto/camera_server.grpc.pb.h"
@@ -150,7 +151,7 @@ ScanBarcodes::ConnectToCamera(
   intrinsic_proto::perception::CreateCameraRequest create_request;
   intrinsic_proto::perception::CreateCameraResponse create_response;
   *create_request.mutable_camera_config() = camera_config;
-  INTR_RETURN_IF_ERROR((*camera_stub)->CreateCamera(client_context.get(), create_request, &create_response));
+  INTR_RETURN_IF_ERROR(intrinsic::ToAbslStatus((*camera_stub)->CreateCamera(client_context.get(), create_request, &create_response)));
 
   *camera_handle = create_response.camera_handle();
 
@@ -177,7 +178,7 @@ ScanBarcodes::GrabFrame(
   frame_request.mutable_timeout()->set_seconds(5);
   frame_request.mutable_post_processing()->set_skip_undistortion(false);
   intrinsic_proto::perception::GetFrameResponse frame_response;
-  INTR_RETURN_IF_ERROR(camera_stub->GetFrame(client_context.get(), frame_request, &frame_response));
+  INTR_RETURN_IF_ERROR(intrinsic::ToAbslStatus(camera_stub->GetFrame(client_context.get(), frame_request, &frame_response)));
   return std::move(*frame_response.mutable_frame());
 }
 

@@ -1,0 +1,149 @@
+# proto-file: google/protobuf/any.proto
+# proto-message: Any
+[type.googleapis.com/intrinsic_proto.hardware.opcua_equipment.OpcuaEquipmentGpioConfig]:  {
+  opcua_equipment_config:  {
+    status_commands:  {
+      key:  "Get"
+      value:  {
+        description:  "Get axis values."
+        signal_names: "lrAxis1"
+        signal_names: "lrAxis2"
+        signal_names: "lrAxis3"
+        signal_names: "lrAxis4"
+        signal_names: "lrAxis5"
+        signal_names: "lrAxis6"
+      }
+    }
+    control_commands: {
+      key: "Write"
+      value: {
+        description: "Write axis values."
+        sequential_commands: {
+          signal_values: {
+            key: "lrAxis1"
+            value: {
+            }
+          }
+          signal_values: {
+            key: "lrAxis2"
+            value: {
+            }
+          }
+          signal_values: {
+            key: "lrAxis3"
+            value: {
+            }
+          }
+          signal_values: {
+            key: "lrAxis4"
+            value: {
+            }
+          }
+          signal_values: {
+            key: "lrAxis5"
+            value: {
+            }
+          }
+          signal_values: {
+            key: "lrAxis6"
+            value: {
+            }
+          }
+        }
+      }
+    }
+    signal_config: {
+      outputs: [
+        {
+          key: "lrAxis1"
+          value: {
+            variable_name: "lrAxis1"
+          }
+        },
+        {
+          key: "lrAxis2"
+          value: {
+            variable_name: "lrAxis2"
+          }
+        },
+                {
+          key: "lrAxis3"
+          value: {
+            variable_name: "lrAxis3"
+          }
+        },
+                {
+          key: "lrAxis4"
+          value: {
+            variable_name: "lrAxis4"
+          }
+        },
+                {
+          key: "lrAxis5"
+          value: {
+            variable_name: "lrAxis5"
+          }
+        },
+                {
+          key: "lrAxis6"
+          value: {
+            variable_name: "lrAxis6"
+          }
+        }
+      ]
+      inputs: [
+          {
+            key: "lrAxis1"
+            value: {
+              variable_name: "lrAxis1"
+            }
+          },
+          {
+            key: "lrAxis2"
+            value: {
+              variable_name: "lrAxis2"
+            }
+          },
+                  {
+            key: "lrAxis3"
+            value: {
+              variable_name: "lrAxis3"
+            }
+          },
+                  {
+            key: "lrAxis4"
+            value: {
+              variable_name: "lrAxis4"
+            }
+          },
+                  {
+            key: "lrAxis5"
+            value: {
+              variable_name: "lrAxis5"
+            }
+          },
+                  {
+            key: "lrAxis6"
+            value: {
+              variable_name: "lrAxis6"
+            }
+          }
+        ]
+      }
+  }
+  gpio_config: {
+    config: {
+      [type.googleapis.com/intrinsic_proto.gpio.OpcuaGpioServiceConfig] {
+        opcua_server_address: "opc.tcp://192.168.100.20:4840"
+        opcua_nodes {
+          node_id: "ns=4;s=MAIN.lrAxis1"  # DOUBLE
+          node_id: "ns=4;s=MAIN.lrAxis2"  # DOUBLE
+          node_id: "ns=4;s=MAIN.lrAxis3"  # DOUBLE
+          node_id: "ns=4;s=MAIN.lrAxis4"  # DOUBLE
+          node_id: "ns=4;s=MAIN.lrAxis5"  # DOUBLE
+          node_id: "ns=4;s=MAIN.lrAxis6"  # DOUBLE
+        }
+      }
+    }
+  }
+}

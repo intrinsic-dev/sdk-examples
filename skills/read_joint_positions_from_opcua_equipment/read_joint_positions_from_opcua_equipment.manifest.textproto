@@ -1,0 +1,33 @@
+id {
+  package: "com.example"
+  name: "read_joint_positions_from_opcua_equipment"
+}
+display_name: "Read joint positions from OPCUA equipment"
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  description: "Reads a set of saved joint positions from an OPCUA equipment and returns it from the skill."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "skills.read_joint_positions_from_opcua_equipment.read_joint_positions_from_opcua_equipment"
+    proto_module: "skills.read_joint_positions_from_opcua_equipment.read_joint_positions_from_opcua_equipment_pb2"
+    create_skill: "skills.read_joint_positions_from_opcua_equipment.read_joint_positions_from_opcua_equipment.ReadJointPositionsFromOpcuaEquipment"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "opcua_equipment"
+    value {
+      capability_names: "OpcuaEquipmentGpioConfig"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.intrinsic.ReadJointPositionsFromOpcuaEquipmentParams"
+}
+return_type {
+  message_full_name: "com.intrinsic.ReadJointPositionsFromOpcuaEquipmentResult"
+}

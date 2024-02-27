@@ -1,0 +1,37 @@
+id {
+  package: "com.example"
+  name: "write_joint_positions_to_opcua_equipment"
+}
+display_name: "Write joint positions to OPCUA equipment"
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  description: "Reads the current joint positions of a robot and writes them to an OPCUA equipment."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "skills.write_joint_positions_to_opcua_equipment.write_joint_positions_to_opcua_equipment"
+    proto_module: "skills.write_joint_positions_to_opcua_equipment.write_joint_positions_to_opcua_equipment_pb2"
+    create_skill: "skills.write_joint_positions_to_opcua_equipment.write_joint_positions_to_opcua_equipment.WriteJointPositionsToOpcuaEquipment"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "robot"
+      value {
+        capability_names: "Icon2Connection"
+        capability_names: "Icon2PositionPart"
+      }
+  }
+  required_equipment {
+    key: "opcua_equipment"
+    value {
+      capability_names: "OpcuaEquipmentGpioConfig"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.intrinsic.WriteJointPositionsToOpcuaEquipmentParams"
+}
