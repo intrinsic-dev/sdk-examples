@@ -73,7 +73,7 @@ class WiggleJoint(skill_interface.Skill):
 
         TIMEOUT_SECONDS = 2.0
 
-        sig_actions_done = icon_api.SignalFlag()
+        sig_actions_done = icon_api.EventFlag()
         success = True
 
         def on_timeout(timestamp, prev_action_id, current_action_id):
@@ -106,7 +106,7 @@ class WiggleJoint(skill_interface.Skill):
                         ),
                         responses=[
                             icon_api.TriggerCallback(on_timeout),
-                            icon_api.Signal(sig_actions_done),
+                            icon_api.Event(sig_actions_done),
                         ],
                     ),
                 ],
@@ -122,7 +122,7 @@ class WiggleJoint(skill_interface.Skill):
                 reactions=[
                     icon_api.Reaction(
                         condition=icon_api.Condition.is_true("xfa.is_settled"),
-                        responses=[icon_api.Signal(sig_actions_done)],
+                        responses=[icon_api.Event(sig_actions_done)],
                     ),
                     icon_api.Reaction(
                         condition=icon_api.Condition.is_greater_than_or_equal(
@@ -131,7 +131,7 @@ class WiggleJoint(skill_interface.Skill):
                         ),
                         responses=[
                             icon_api.TriggerCallback(on_timeout),
-                            icon_api.Signal(sig_actions_done),
+                            icon_api.Event(sig_actions_done),
                         ],
                     ),
                 ],

@@ -28,16 +28,16 @@ class WiggleJointTest(unittest.TestCase):
             spec_set=True,
             instance=True)
         self.mock_equipment_utils.init_icon_client.return_value = self.mock_icon_client
-        self.signal_flag_class_patcher = patch('intrinsic.icon.python.icon_api.SignalFlag', spec_set=True, autospec=True)
-        self.mock_signal_flag = create_autospec(
-            spec=icon_api.SignalFlag,
+        self.event_flag_class_patcher = patch('intrinsic.icon.python.icon_api.EventFlag', spec_set=True, autospec=True)
+        self.mock_event_flag = create_autospec(
+            spec=icon_api.EventFlag,
             spec_set=True,
             instance=True)
-        self.mock_signal_flag_class = self.signal_flag_class_patcher.start()
-        self.mock_signal_flag_class.return_value = self.mock_signal_flag
+        self.mock_event_flag_class = self.event_flag_class_patcher.start()
+        self.mock_event_flag_class.return_value = self.mock_event_flag
 
     def tearDown(self) -> None:
-        self.signal_flag_class_patcher.stop()
+        self.event_flag_class_patcher.stop()
         self.equipment_utils_patcher.stop()
 
     def test_logs_success_message(self):
@@ -57,7 +57,7 @@ class WiggleJointTest(unittest.TestCase):
             dut_skill.execute(mock_request, mock_context)
         self.assertIn("movement is complete", log_output[0][-1].message)
 
-        self.mock_signal_flag.wait.assert_called_once()
+        self.mock_event_flag.wait.assert_called_once()
 
 
 if __name__ == '__main__':
