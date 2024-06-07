@@ -1,5 +1,5 @@
 bazel-**
 .vscode/settings.json
 .vscode/intrinsic/bazel-**
-.env
+.pybazel.env
 compile_commands.json
