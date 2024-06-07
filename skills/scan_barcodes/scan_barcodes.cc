@@ -39,15 +39,15 @@ ConvertBarcodeTypeToProto(const std::string & type)
   // https://github.com/opencv/opencv/blob/
   // e8f94182f577894410cc59d5d20979dff69d8878/modules/objdetect/src/
   // barcode_decoder/abs_decoder.hpp#L46-L51
-  if ("EAN_8" == type) {
+  if (type == "EAN_8") {
     return BarcodeType::BARCODE_EAN_8;
-  } else if ("EAN_13") {
+  } else if (type == "EAN_13") {
     return BarcodeType::BARCODE_EAN_13;
-  } else if ("UPC_E") {
+  } else if (type == "UPC_E") {
     return BarcodeType::BARCODE_UPC_E;
-  } else if ("UPC_A") {
+  } else if (type == "UPC_A") {
     return BarcodeType::BARCODE_UPC_A;
-  } else if ("UPC_EAN_EXTENSION") {
+  } else if (type == "UPC_EAN_EXTENSION") {
     return BarcodeType::BARCODE_UPC_EAN_EXTENSION;
   }
 
@@ -184,9 +184,9 @@ ScanBarcodes::GrabFrame(
 
 absl::StatusOr<std::unique_ptr<ScanBarcodesResult>>
 ScanBarcodes::ConvertToResultProto(
-  std::vector<std::string> decoded_data,
-  std::vector<std::string> decoded_types,
-  std::vector<cv::Point2f> detected_corners)
+  const std::vector<std::string>& decoded_data,
+  const std::vector<std::string>& decoded_types,
+  const std::vector<cv::Point2f>& detected_corners)
 {
   auto result = std::make_unique<ScanBarcodesResult>();
 

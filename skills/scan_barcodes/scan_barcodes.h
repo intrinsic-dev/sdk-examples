@@ -52,9 +52,9 @@ class ScanBarcodes : public intrinsic::skills::SkillInterface {
 
   absl::StatusOr<std::unique_ptr<::com::example::ScanBarcodesResult>>
   ConvertToResultProto(
-    std::vector<std::string> decoded_data,
-    std::vector<std::string> decoded_types,
-    std::vector<cv::Point2f> detected_corners);
+    const std::vector<std::string>& decoded_data,
+    const std::vector<std::string>& decoded_types,
+    const std::vector<cv::Point2f>& detected_corners);
 
   cv::barcode::BarcodeDetector detector_;
 };
