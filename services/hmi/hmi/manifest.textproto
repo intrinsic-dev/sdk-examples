@@ -1,0 +1,29 @@
+# proto-file: intrinsic/assets/services/proto/service_manifest.proto
+# proto-message: intrinsic_proto.services.ServiceManifest
+
+metadata {
+  id {
+    package: "my.name"
+    name: "hmi"
+  }
+  vendor {
+    display_name: "Name"
+  }
+  documentation {
+    description: "A simple HMI."
+  }
+  display_name: "HMI"
+}
+service_def {
+  http_config: {}
+  real_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+  sim_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+}

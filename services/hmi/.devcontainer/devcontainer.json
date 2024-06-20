@@ -1,0 +1,16 @@
+{
+  "name": "intrinsic-flowstate-beta",
+  "image": "ghcr.io/intrinsic-dev/intrinsic-dev-img:latest",
+  "runArgs": ["--network=host"],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "intrinsic.defaultSdkRepository": "https://github.com/intrinsic-dev/intrinsic_sdks"
+      },
+      "extensions": ["golang.go"]
+    }
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/usr/local/go/bin"
+  }
+}
