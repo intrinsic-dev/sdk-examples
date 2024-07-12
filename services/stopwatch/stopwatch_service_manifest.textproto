@@ -1,0 +1,26 @@
+metadata {
+  id {
+    package: "com.example"
+    name: "stopwatch_service"
+  }
+  vendor {
+    display_name: "Intrinsic"
+  }
+  documentation {
+    description: "A service that acts as a stopwatch."
+  }
+  display_name: "Stopwatch Service"
+}
+service_def {
+  service_proto_prefixes: "/stopwatch.StopwatchService/"
+  real_spec {
+    image {
+      archive_filename: "stopwatch_service_image.tar"
+    }
+  }
+  sim_spec {
+    image {
+      archive_filename: "stopwatch_service_image.tar"
+    }
+  }
+}

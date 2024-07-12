@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HMI</title>
+<base href="{{.BaseURL}}" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+/>
+
+<section class="section">
+  <div class="container">
+    <h1 class="title">HMI</h1>
+    <div class="box">
+      Current status:
+      <strong id="status" class="has-text-primary">Loading...</strong>
+    </div>
+    <div style="display: none" class="notification" id="result"></div>
+    <button disabled class="button is-success" id="start1">
+      Start Process (success)
+    </button>
+    <button disabled class="button is-danger" id="start2">
+      Start Process (failure)
+    </button>
+    <button disabled class="button is-danger" id="stop">Stop</button>
+  </div>
+</section>
+
+<script>
+  let operationId = "";
+
+  const start1El = document.getElementById("start1");
+  const start2El = document.getElementById("start2");
+  const stopEl = document.getElementById("stop");
+  const statusEl = document.getElementById("status");
+  const resultEl = document.getElementById("result");
+  refreshStatus();
+
+  stopEl.addEventListener("click", stop);
+  start1El.addEventListener("click", () => {
+    start("process_1.pb");
+  });
+  start2El.addEventListener("click", () => {
+    start("process_fail.pb");
+  });
+
+  async function refreshStatus() {
+    try {
+      const res = await fetch("api/executive/status");
+      const s = await res.json();
+      statusEl.textContent = s.status;
+      operationId = s.operationId;
+
+      const runningStatuses = ["RUNNING", "SUSPENDING", "CANCELING"];
+      if (operationId) {
+        if (runningStatuses.includes(s.status)) {
+          start1El.disabled = true;
+          start2El.disabled = true;
+          stopEl.disabled = false;
+        } else {
+          start1El.disabled = false;
+          start2El.disabled = false;
+          stopEl.disabled = true;
+        }
+      } else {
+        start1El.disabled = true;
+        start2El.disabled = true;
+        stopEl.disabled = true;
+      }
+
+      if (s.done) {
+        if (s.error) {
+          resultEl.classList.add('is-danger');
+          resultEl.classList.remove('is-success');
+          resultEl.textContent = s.error;
+        } else {
+          resultEl.classList.add('is-success');
+          resultEl.classList.remove('is-danger');
+          resultEl.textContent = "The process run succeeded";
+        }
+        resultEl.style.display = "block";
+      } else {
+        resultEl.style.display = "none";
+      }
+    } catch (e) {
+      statusEl.textContent = s.error;
+      operationId = "";
+    }
+    // Refresh the current status every second.
+    setTimeout(refreshStatus, 1000);
+  }
+
+  async function stop() {
+    if (!operationId) {
+      return;
+    }
+    try {
+      const req = new Request(`api/executive/${operationId}/stop`, {
+        method: "POST",
+      });
+      await fetch(req);
+    } catch (e) {
+      console.log("Stopping failed:", e);
+    }
+  }
+
+  async function start(processName) {
+    if (!processName) {
+      return;
+    }
+    try {
+      const req = new Request("api/executive/start", {
+        body: JSON.stringify({ processName }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const res = await fetch(req);
+      const s = await res.json();
+      operationId = s.operationId;
+    } catch (e) {
+      console.log("Starting failed:", e);
+    }
+  }
+</script>
