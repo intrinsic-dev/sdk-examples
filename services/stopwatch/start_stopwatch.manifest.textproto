@@ -1,0 +1,33 @@
+id {
+  package: "com.example"
+  name: "start_stopwatch"
+}
+display_name: "StartStopwatch"
+vendor {
+  display_name: "Unknown Vendor"
+}
+documentation {
+  description: "TODO: Describe what the skill does here."
+}
+options {
+  supports_cancellation: false
+  python_config {
+    skill_module: "services.stopwatch.start_stopwatch"
+    proto_module: "services.stopwatch.start_stopwatch_pb2"
+    create_skill: "services.stopwatch.start_stopwatch.StartStopwatch"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "stopwatch_service"
+    value {
+      capability_names: "stopwatch.StopwatchService"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.StartStopwatchParams"
+  default_value {
+    type_url: "type.googleapis.com/com.example.StartStopwatchParams"
+  }
+}
