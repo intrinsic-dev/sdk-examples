@@ -43,7 +43,6 @@ py_library(
 py_skill(
     name = "write_joint_positions_to_opcua_equipment_image",
     manifest = ":write_joint_positions_to_opcua_equipment_py_manifest",
-    proto = ":write_joint_positions_to_opcua_equipment_proto",
     deps = [
         ":write_joint_positions_to_opcua_equipment",
         ":write_joint_positions_to_opcua_equipment_py_pb2",

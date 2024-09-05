@@ -55,17 +55,6 @@ load("@rules_foreign_cc//foreign_cc:repositories.bzl", "rules_foreign_cc_depende
 
 rules_foreign_cc_dependencies()
 
-http_archive(
-    name = "container_structure_test",
-    sha256 = "56fa7c8f2a080a0970b06c3fabc29367cb45ef6950526c24a41b07e813f77dfa",
-    strip_prefix = "container-structure-test-1.18.1",
-    urls = ["https://github.com/GoogleContainerTools/container-structure-test/archive/refs/tags/v1.18.1.tar.gz"],
-)
-
-load("@container_structure_test//:repositories.bzl", "container_structure_test_register_toolchain")
-
-container_structure_test_register_toolchain(name = "cst")
-
 load("@rules_oci//oci:pull.bzl", "oci_pull")
 
 oci_pull(

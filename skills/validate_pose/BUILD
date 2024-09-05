@@ -37,7 +37,6 @@ skill_manifest(
 py_skill(
     name = "validate_pose_py_image",
     manifest = ":validate_pose_py_manifest",
-    proto = ":validate_pose_proto",
     deps = [
         ":validate_pose_py",
         ":validate_pose_py_pb2",
@@ -87,7 +86,6 @@ cc_library(
 cc_skill(
     name = "validate_pose_cc_image",
     manifest = ":validate_pose_cc_manifest",
-    proto = ":validate_pose_proto",
     deps = [
         ":validate_pose_cc",
         ":validate_pose_cc_proto",

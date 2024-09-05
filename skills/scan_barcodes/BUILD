@@ -41,7 +41,6 @@ skill_manifest(
 py_skill(
     name = "scan_barcodes_py_image",
     manifest = ":scan_barcodes_py_manifest",
-    proto = ":scan_barcodes_proto",
     deps = [
         ":scan_barcodes_py",
         ":scan_barcodes_py_pb2",
@@ -102,10 +101,8 @@ cc_library(
 cc_skill(
     name = "scan_barcodes_cc_image",
     manifest = ":scan_barcodes_cc_manifest",
-    proto = ":scan_barcodes_proto",
     deps = [
         ":scan_barcodes_cc",
         ":scan_barcodes_cc_proto",
     ]
 )
-0

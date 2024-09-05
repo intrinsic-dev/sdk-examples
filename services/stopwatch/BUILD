@@ -3,6 +3,7 @@ load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_grpc_library", "py_pro
 load("@rules_proto//proto:defs.bzl", "proto_library")
 load("@ai_intrinsic_sdks//bazel:python_oci_image.bzl", "python_oci_image")
 load("@ai_intrinsic_sdks//intrinsic/assets/services/build_defs:services.bzl", "intrinsic_service")
+load("@stopwatch_pip_deps//:requirements.bzl", "requirement")
 
 proto_library(
     name = "stopwatch_service_proto",
@@ -18,7 +19,7 @@ py_proto_library(
 py_grpc_library(
     name = "stopwatch_service_py_pb2_grpc",
     srcs = [":stopwatch_service_proto"],
-    grpc_library = "@ai_intrinsic_sdks_pip_deps//grpcio:pkg",
+    grpc_library = requirement("grpcio"),
     visibility = ["//visibility:public"],
     deps = [":stopwatch_service_py_pb2"],
 )
@@ -30,13 +31,13 @@ py_binary(
     deps = [
         ":stopwatch_service_py_pb2_grpc",
         "@ai_intrinsic_sdks//intrinsic/resources/proto:runtime_context_py_pb2",
-        "@ai_intrinsic_sdks_pip_deps//grpcio:pkg",
+        requirement("grpcio"),
     ],
 )
 
 python_oci_image(
     name = "stopwatch_service_image",
-    base = "@distroless_python",
+    base = "@distroless_python3",
     binary = "stopwatch_service_bin",
     entrypoint = [
         "python3",
@@ -84,7 +85,7 @@ py_library(
         "@com_google_absl_py//absl/logging",
         "@com_google_protobuf//:protobuf_python",
         "@ai_intrinsic_sdks//intrinsic/util/grpc:connection",
-        "@ai_intrinsic_sdks//intrinsic/util/grpc:interceptor", 
+        "@ai_intrinsic_sdks//intrinsic/util/grpc:interceptor",
     ],
 )
 

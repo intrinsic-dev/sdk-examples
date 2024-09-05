@@ -47,7 +47,7 @@ oci_image(
     name = "hmi_image",
     base = "@distroless_base_amd64_oci",
     tars = [":server_layer"],
-    entrypoint = ["/hmi/server_/server"],
+    entrypoint = ["/services/hmi/server_/server"],
 )
 
 oci_tarball(

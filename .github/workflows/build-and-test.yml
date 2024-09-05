@@ -1,0 +1,38 @@
+name: Build and Test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  Build-And-Test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be  #v1.3.1
+        with:
+          tool-cache: verbose_failures
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - name: Determine Bazel version
+        run: |
+          echo "DETECTED_BAZEL_VERSION=$(bazel --version | awk '{print $NF}')" >> $GITHUB_OUTPUT
+        id: bazel_version
+      - name: Cache Bazel
+        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84  # v3.3.2
+        with:
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ steps.bazel_version.outputs.DETECTED_BAZEL_VERSION }}-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-${{ steps.bazel_version.outputs.DETECTED_BAZEL_VERSION }}-
+      - name: Update SDK to latest
+        run: bazel fetch --repo=@ai_intrinsic_sdks --force
+      - name: Build And Test
+        run: bazel test --verbose_failures --test_output=errors --nobuild_tests_only //...

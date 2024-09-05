@@ -4,7 +4,12 @@ from unittest.mock import patch
 
 import cv2
 import numpy as np
-from rules_python.python.runfiles import runfiles
+
+try:
+    from rules_python.python.runfiles import runfiles
+except ImportError:
+    # https://github.com/bazelbuild/rules_python/issues/1679
+    from python.runfiles import runfiles
 
 from intrinsic.perception.python.camera.cameras import Camera
 from intrinsic.perception.python.camera.data_classes import SensorImage

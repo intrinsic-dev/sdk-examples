@@ -43,7 +43,6 @@ py_library(
 py_skill(
     name = "read_joint_positions_from_opcua_equipment_image",
     manifest = ":read_joint_positions_from_opcua_equipment_py_manifest",
-    proto = ":read_joint_positions_from_opcua_equipment_proto",
     deps = [
         ":read_joint_positions_from_opcua_equipment",
         ":read_joint_positions_from_opcua_equipment_py_pb2",

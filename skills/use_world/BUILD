@@ -39,7 +39,6 @@ skill_manifest(
 py_skill(
     name = "use_world_py_image",
     manifest = ":use_world_py_manifest",
-    proto = ":use_world_proto",
     deps = [
         ":use_world_py",
         ":use_world_py_pb2",
@@ -89,7 +88,6 @@ cc_library(
 cc_skill(
     name = "use_world_cc_image",
     manifest = ":use_world_cc_manifest",
-    proto = ":use_world_proto",
     deps = [
         ":use_world_cc",
         ":use_world_cc_proto",

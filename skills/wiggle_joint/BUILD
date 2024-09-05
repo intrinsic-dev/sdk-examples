@@ -49,7 +49,6 @@ cc_library(
 cc_skill(
     name = "wiggle_joint_cc_image",
     manifest = ":wiggle_joint_cc_manifest",
-    proto = ":wiggle_joint_proto",
     deps = [
         ":wiggle_joint_cc",
         ":wiggle_joint_cc_proto",
@@ -88,7 +87,6 @@ skill_manifest(
 py_skill(
     name = "wiggle_joint_py_image",
     manifest = ":wiggle_joint_py_manifest",
-    proto = ":wiggle_joint_proto",
     deps = [
         ":wiggle_joint_py",
         ":wiggle_joint_py_pb2",

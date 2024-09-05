@@ -35,7 +35,6 @@ skill_manifest(
 py_skill(
     name = "say_skill_py_image",
     manifest = ":say_skill_py_manifest",
-    proto = ":say_skill_proto",
     deps = [
         ":say_skill_py",
         ":say_skill_py_pb2",
@@ -83,7 +82,6 @@ cc_library(
 cc_skill(
     name = "say_skill_cc_image",
     manifest = ":say_skill_cc_manifest",
-    proto = ":say_skill_proto",
     deps = [
         ":say_skill_cc",
         ":say_skill_cc_proto",
