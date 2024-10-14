@@ -1,6 +1,6 @@
 load("@ai_intrinsic_sdks//bazel:go_macros.bzl", "go_binary")
 load("@ai_intrinsic_sdks//intrinsic/assets/services/build_defs:services.bzl", "intrinsic_service")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@container_structure_test//:defs.bzl", "container_structure_test")
 
@@ -41,30 +41,37 @@ pkg_tar(
     srcs = [":server"],
     strip_prefix = "/",
     include_runfiles = True,
+    extension = "tar.gz",
 )
 
 oci_image(
     name = "hmi_image",
-    base = "@distroless_base_amd64_oci",
+    base = "@distroless_base",
     tars = [":server_layer"],
     entrypoint = ["/services/hmi/server_/server"],
 )
 
-oci_tarball(
+oci_load(
     name = "hmi_tarball",
     image = ":hmi_image",
     repo_tags = ["hmi:latest"],
+)
+
+filegroup(
+    name = "hmi_tarball.tar",
+    srcs = [":hmi_tarball"],
+    output_group = "tarball",
 )
 
 container_structure_test(
     name = "hmi_tarball_test",
     driver = "tar",
     configs = ["testdata/image_files.yaml"],
-    image = ":hmi_tarball",
+    image = ":hmi_tarball.tar",
 )
 
 intrinsic_service(
     name = "hmi_service",
-    images = [":hmi_tarball"],
+    images = [":hmi_tarball.tar"],
     manifest = "manifest.textproto",
 )

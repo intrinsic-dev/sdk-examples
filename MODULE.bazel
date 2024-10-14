@@ -96,10 +96,12 @@ use_repo(pip, "stopwatch_pip_deps")
 # Containers
 ##########
 
-bazel_dep(name = "rules_oci", version = "1.8.0")
-
-extension_for_rules_oci = use_extension("@ai_intrinsic_sdks//bazel:extension_for_rules_oci.bzl", "extension_for_rules_oci_ext")
-use_repo(extension_for_rules_oci, "distroless_python3")
-use_repo(extension_for_rules_oci, "distroless_base_amd64_oci")
+bazel_dep(name = "rules_oci", version = "2.0.0")
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+use_repo(
+    oci,
+    "distroless_base",
+    "distroless_python3",
+)
 
 bazel_dep(name = "container_structure_test", version="1.19.1")
