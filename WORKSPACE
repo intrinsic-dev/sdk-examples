@@ -4,7 +4,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(
     name = "ai_intrinsic_sdks",
-    remote = "https://github.com/intrinsic-dev/sdk.git",
+    remote = "https://github.com/intrinsic-ai/sdk.git",
     branch = "main",
 )
 

@@ -1,6 +1,6 @@
 # Intrinsic SDK Examples
 
-This is a repository of example skill implementations using the [Intrinsic SDK](github.com/intrinsic-dev/sdk).
+This is a repository of example skill implementations using the [Intrinsic SDK](github.com/intrinsic-ai/sdk).
 
 ## Disclaimer
 

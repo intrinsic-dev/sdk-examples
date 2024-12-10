@@ -1,7 +1,7 @@
 load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
 load("@rules_cc//cc:defs.bzl", "cc_proto_library")
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 
 proto_library(
     name = "wiggle_joint_proto",

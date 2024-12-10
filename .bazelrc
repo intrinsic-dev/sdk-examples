@@ -1,5 +1,3 @@
-# Copyright 2023 Intrinsic Innovation LLC
-
 # Enable Bzlmod for every Bazel command
 common --enable_bzlmod
 
@@ -15,10 +13,15 @@ build --dynamic_mode=off
 build --java_runtime_version=remotejdk_11
 
 # Always use the pre-configured toolchain.
+build --repo_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 build --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN=1
 
 # Use C++20.
 build --cxxopt='-std=c++20'
+build --host_cxxopt='-std=c++20'
+
+# Work around go issue with LLVM 15+: https://github.com/bazelbuild/rules_go/issues/3691#issuecomment-2263999685
+build --@io_bazel_rules_go//go/config:linkmode=pie
 
 # Use a static value for `PATH` and does not inherit `LD_LIBRARY_PATH`. Doesn't let environment
 # variables like `PATH` sneak into the build, which can cause massive cache misses when they change.
@@ -31,6 +34,9 @@ build --incompatible_strict_action_env
 # `bazel-out/k8-fastbuild/bin/external/com_github_grpc_grpc/external/com_github_grpc_grpc: warning: directory does not exist`
 build --incompatible_generated_protos_in_virtual_imports
 build --incompatible_default_to_explicit_init_py
+
+# Avoid warnings from third-party deps that we don't control.
+build --per_file_copt=external/.*@-Wno-everything
 
 # Set a higher timeout value, just in case.
 build --remote_timeout=3600

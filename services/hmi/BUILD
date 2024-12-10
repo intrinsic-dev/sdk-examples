@@ -9,25 +9,21 @@ filegroup(
     srcs = glob(["frontend/**"]),
 )
 
-filegroup(
-    name = "process_files",
-    srcs = glob(["processes/**"]),
-)
-
 go_binary(
     name = "server",
     srcs = ["server.go"],
-    data = [":frontend_files", ":process_files"],
+    data = [":frontend_files"],
     deps = [
         "@ai_intrinsic_sdks//intrinsic/executive/proto:executive_service_go_grpc_proto",
         "@ai_intrinsic_sdks//intrinsic/executive/proto:executive_service_go_proto",
         "@ai_intrinsic_sdks//intrinsic/executive/proto:behavior_tree_go_proto",
         "@ai_intrinsic_sdks//intrinsic/executive/proto:executive_execution_mode_go_proto",
         "@ai_intrinsic_sdks//intrinsic/executive/proto:run_metadata_go_proto",
+        "@ai_intrinsic_sdks//intrinsic/frontend/solution_service/proto:solution_service_go_proto",
+        "@ai_intrinsic_sdks//intrinsic/frontend/solution_service/proto:solution_service_go_grpc_proto",
         "@ai_intrinsic_sdks//intrinsic/resources/proto:runtime_context_go_proto",
         "@ai_intrinsic_sdks//intrinsic/util/proto:protoio",
         "@io_bazel_rules_go//go/runfiles",
-        "@io_bazel_rules_go//go/tools/bazel",
         "@org_golang_google_grpc//:go_default_library",
         "@org_golang_google_grpc//credentials/insecure",
         "@org_golang_google_protobuf//encoding/protojson",

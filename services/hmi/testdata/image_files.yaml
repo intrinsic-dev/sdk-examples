@@ -5,9 +5,3 @@ fileExistenceTests:
   path: '/services/hmi/server_/server'
   shouldExist: true
   isExecutableBy: 'group'
-- name: 'Index HTML'
-  path: '/services/hmi/frontend/index.html'
-  shouldExist: true
-- name: 'Process'
-  path: '/services/hmi/processes/process_1.pb'
-  shouldExist: true
