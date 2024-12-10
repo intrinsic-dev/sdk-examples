@@ -16,11 +16,14 @@
       <strong id="status" class="has-text-primary">Loading...</strong>
     </div>
     <div style="display: none" class="notification" id="result"></div>
-    <button disabled class="button is-success" id="start1">
-      Start Process (success)
-    </button>
-    <button disabled class="button is-danger" id="start2">
-      Start Process (failure)
+    <div class="box">
+      Select a behavior tree to execute:
+      <select id="bt-list">
+        <option value="">Select an option</option> 
+      </select>
+    </div>
+    <button disabled class="button is-success" id="start">
+      Start Process
     </button>
     <button disabled class="button is-danger" id="stop">Stop</button>
   </div>
@@ -28,66 +31,101 @@
 
 <script>
   let operationId = "";
+  let behaviorTreeName = "";
+  let showStatus = false;
 
-  const start1El = document.getElementById("start1");
-  const start2El = document.getElementById("start2");
+  const startEl = document.getElementById("start");
   const stopEl = document.getElementById("stop");
   const statusEl = document.getElementById("status");
   const resultEl = document.getElementById("result");
+  const btListEl = document.getElementById("bt-list");
   refreshStatus();
 
-  stopEl.addEventListener("click", stop);
-  start1El.addEventListener("click", () => {
-    start("process_1.pb");
+  btListEl.addEventListener('mousedown', async () => {
+    // Clear existing options.
+    btListEl.innerHTML = '<option value="">Select an option</option>'; 
+
+    // Add all currently saved behavior trees in solution.
+    const options = await getBehaviorTrees(); 
+    options.forEach(optionText => {
+      const option = document.createElement('option');
+      option.value = optionText;
+      option.text = optionText;
+      btListEl.add(option);
+    });
+    behaviorTreeName = "";
   });
-  start2El.addEventListener("click", () => {
-    start("process_fail.pb");
+
+  btListEl.addEventListener('change', (event) => {
+    behaviorTreeName = event.target.value;
+    showStatus = false;
+  });
+
+  stopEl.addEventListener("click", stop);
+  startEl.addEventListener("click", () => {
+    start(behaviorTreeName);
   });
 
   async function refreshStatus() {
-    try {
-      const res = await fetch("api/executive/status");
-      const s = await res.json();
-      statusEl.textContent = s.status;
-      operationId = s.operationId;
+    if (!behaviorTreeName){
+      statusEl.textContent = "UNSPECIFIED";
+      resultEl.style.display = "none";
+    } else {
+      try {
+        const res = await fetch("api/executive/status");
+        const s = await res.json();
+        statusEl.textContent = showStatus ? s.status : "UNSPECIFIED";
+        operationId = s.operationId;
 
-      const runningStatuses = ["RUNNING", "SUSPENDING", "CANCELING"];
-      if (operationId) {
-        if (runningStatuses.includes(s.status)) {
-          start1El.disabled = true;
-          start2El.disabled = true;
-          stopEl.disabled = false;
+        const runningStatuses = ["RUNNING", "SUSPENDING", "CANCELING"];
+        if (operationId) {
+          if (runningStatuses.includes(s.status)) {
+            startEl.disabled = true;
+            stopEl.disabled = false;
+          } else {
+            startEl.disabled = false;
+            stopEl.disabled = true;
+          }
         } else {
-          start1El.disabled = false;
-          start2El.disabled = false;
+          startEl.disabled = true;
           stopEl.disabled = true;
         }
-      } else {
-        start1El.disabled = true;
-        start2El.disabled = true;
-        stopEl.disabled = true;
-      }
 
-      if (s.done) {
-        if (s.error) {
-          resultEl.classList.add('is-danger');
-          resultEl.classList.remove('is-success');
-          resultEl.textContent = s.error;
+        if (s.done && showStatus) {
+          if (s.error) {
+            resultEl.classList.add('is-danger');
+            resultEl.classList.remove('is-success');
+            resultEl.textContent = s.error;
+          } else {
+            resultEl.classList.add('is-success');
+            resultEl.classList.remove('is-danger');
+            resultEl.textContent = "The process run succeeded";
+          }
+          resultEl.style.display = "block";
         } else {
-          resultEl.classList.add('is-success');
-          resultEl.classList.remove('is-danger');
-          resultEl.textContent = "The process run succeeded";
+          resultEl.style.display = "none";
         }
-        resultEl.style.display = "block";
-      } else {
-        resultEl.style.display = "none";
+      } catch (e) {
+        statusEl.textContent = s.error;
+        operationId = "";
       }
-    } catch (e) {
-      statusEl.textContent = s.error;
-      operationId = "";
     }
-    // Refresh the current status every second.
-    setTimeout(refreshStatus, 1000);
+      // Refresh the current status every second.
+      setTimeout(refreshStatus, 1000);
+  }
+
+  async function getBehaviorTrees() {
+    let s;
+    try {
+      const res = await fetch("api/solution_service/list");
+      s = await res.json();
+      if(Array.isArray(s['names']) && s['names'].length > 0) {
+        return s['names'];
+      } 
+    } catch (e) {
+      console.log(s.error);
+    }
+    return [];
   }
 
   async function stop() {
@@ -122,5 +160,6 @@
     } catch (e) {
       console.log("Starting failed:", e);
     }
+    showStatus = true;
   }
 </script>

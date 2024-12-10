@@ -11,8 +11,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
-	"path"
 	"strings"
 
 	btpb "intrinsic/executive/proto/behavior_tree_go_proto"
@@ -20,18 +18,16 @@ import (
 	esvcgrpcpb "intrinsic/executive/proto/executive_service_go_grpc_proto"
 	rmpb "intrinsic/executive/proto/run_metadata_go_proto"
 	rcpb "intrinsic/resources/proto/runtime_context_go_proto"
+	ssvcgrpcpb "intrinsic/frontend/solution_service/proto/solution_service_go_grpc_proto"
 
 	lropb "cloud.google.com/go/longrunning/autogen/longrunningpb"
-	"github.com/bazelbuild/rules_go/go/tools/bazel"
+	"github.com/bazelbuild/rules_go/go/runfiles"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
-	packageDir    = "services/hmi"
-	indexFilePath = packageDir + "/frontend/index.html"
-	processesDir  = packageDir + "/processes"
+	indexFilePath = "examples/services/hmi/frontend/index.tml"
 
 	// defaultRuntimeContextPath is the well-known location for the runtime config
 	// inside on-prem devices.
@@ -176,10 +172,13 @@ func (e *executiveClient) start(ctx context.Context, bt *btpb.BehaviorTree) (*ex
 	res, err = e.cl.StartOperation(ctx, &esvcgrpcpb.StartOperationRequest{
 		Name:           res.GetName(),
 		// These could be made configurable as a new functionality. The execution
-		// mode enables step-wise execution and the simulation mode could be
-		// switched to physics based simulation if needed.
+		// mode enables step-wise (ExecutionMode_EXECUTION_MODE_STEP_WISE) or
+		// continuous (ExecutionMode_EXECUTION_MODE_NORMAL) execution and the
+		// simulation mode could be switched to physics-based
+		// (SimulationMode_SIMULATION_MODE_REALITY) or draft simulation
+		// (SimulationMode_SIMULATION_MODE_DRAFT), as needed.
 		ExecutionMode:  eempb.ExecutionMode_EXECUTION_MODE_NORMAL,
-		SimulationMode: eempb.SimulationMode_SIMULATION_MODE_DRAFT,
+		SimulationMode: eempb.SimulationMode_SIMULATION_MODE_REALITY,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("could not start operation: %w", err)
@@ -189,13 +188,13 @@ func (e *executiveClient) start(ctx context.Context, bt *btpb.BehaviorTree) (*ex
 	}, nil
 }
 
-// serve encapsulates the HTTP server providing the frontend and API for the
+// server encapsulates the HTTP server providing the frontend and API for the
 // HMI service.
 type server struct {
-	baseURL       string
-	indexTemplate *template.Template
-	executive     *executiveClient
-	processes     map[string]*btpb.BehaviorTree
+	baseURL        string
+	indexTemplate  *template.Template
+	executive      *executiveClient
+	solutionClient ssvcgrpcpb.SolutionServiceClient
 }
 
 // start runs the HTTP server at the given address.
@@ -210,6 +209,7 @@ func (s *server) start(address string) error {
 	http.HandleFunc("GET /api/executive/status", s.executiveStatus)
 	http.HandleFunc("POST /api/executive/{id}/stop", s.executiveStop)
 	http.HandleFunc("POST /api/executive/start", s.executiveStart)
+	http.HandleFunc("GET /api/solution_service/list", s.listProcesses)
 
 	log.Printf("Listening at %s", address)
 	return http.ListenAndServe(address, nil)
@@ -239,6 +239,40 @@ func (s *server) executiveStatus(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, status)
 }
 
+type listProcessesResponse struct {
+	Names []string `json:"names"`
+}
+
+// listProcesses lists all saved processes, i.e., behavior trees, of the running solution.
+func (s *server) listProcesses(w http.ResponseWriter, r *http.Request) {
+	listBtReq := &ssvcgrpcpb.ListBehaviorTreesRequest{
+		PageSize: 25,
+	}
+	res, err := s.solutionClient.ListBehaviorTrees(r.Context(), listBtReq)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		writeJSON(w, wrapErr(fmt.Errorf("could not get list of behavior trees in solution: %w", err)))
+		return
+	}
+	// Support for traversing multiple/all pages needs to be added if there
+	// may be more than {{PageSize}} behavior trees. 
+	if res.NextPageToken != "" {
+		w.WriteHeader(http.StatusInternalServerError)
+		writeJSON(w, wrapErr(fmt.Errorf("too many behavior trees, pagination needs to be supported: %w", err)))
+		return
+	}
+
+	// Create a list with the names of all saved behavior trees.
+	var btNames []string
+	for _, bt := range res.GetBehaviorTrees() {
+		btNames = append(btNames, bt.GetName())
+	}
+	btList := &listProcessesResponse{
+		Names: btNames,
+	}
+	writeJSON(w, btList)
+}
+
 // executiveStop stops the executive operation with the ID in the path.
 func (s *server) executiveStop(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
@@ -259,8 +293,8 @@ type executiveStartRequest struct {
 	ProcessName string `json:"processName"`
 }
 
-// executiveStart starts a pre-defined process with a name from the request.
-// Processes are loaded into the [server] from files.
+// executiveStart starts a process with a name from the request.
+// Processes are loaded into the [server] through the solutionClient.
 func (s *server) executiveStart(w http.ResponseWriter, r *http.Request) {
 	rawReq, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -279,12 +313,16 @@ func (s *server) executiveStart(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, wrapErr(errors.New("processName must not be empty")))
 		return
 	}
-	bt, ok := s.processes[req.ProcessName]
-	if !ok {
+	btReq:= &ssvcgrpcpb.GetBehaviorTreeRequest{
+		Name: req.ProcessName,
+	}
+	bt, err := s.solutionClient.GetBehaviorTree(r.Context(), btReq)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		writeJSON(w, wrapErr(fmt.Errorf("process %q not found", req.ProcessName)))
 		return
 	}
+
 	res, err := s.executive.start(r.Context(), bt)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -299,15 +337,10 @@ func main() {
 	// local testing scenarios.
 	flag.Parse()
 
-	// The file root is different when running the executable in the service
-	// container vs. running locally with Bazel. When running with Bazel all files
-	// will be provided as runfiles and placed in a specific runfiles directory.
-	// This directory has the same layout as the container image but with a
-	// different base path.
-	filesRoot, err := bazel.RunfilesPath()
+	// Must use a runfiles library to determine where Bazel put files.
+	r, err := runfiles.New()
 	if err != nil {
-		// Runfiles are placed relative to the container root when running there.
-		filesRoot = "/"
+		log.Fatalf("unable to create runfiles object: %v", err)
 	}
 
 	rc := new(rcpb.RuntimeContext)
@@ -326,33 +359,10 @@ func main() {
 	address := fmt.Sprintf(":%d", rc.GetHttpPort())
 	baseURL := fmt.Sprintf(*baseURLFormat, rc.GetName())
 
-	// The HMI allows starting pre-specified processes using a name. These
-	// processes are read from the file system and kept in memory. Each one is
-	// a binary encoded behavior tree proto. More processes can be added. Simply
-	// create the process in Flowstate and select `Process` > `Export` from the
-	// menu bar. Then add the resulting file to the `hmi/processes` directory.
-	fullProcessesDir := path.Join(filesRoot, processesDir)
-	processEntries, err := os.ReadDir(fullProcessesDir)
-	if err != nil {
-		log.Fatalf("Failed to read static processes: %v", err)
-	}
-	processes := make(map[string]*btpb.BehaviorTree)
-	for _, entry := range processEntries {
-		f, err := os.ReadFile(path.Join(fullProcessesDir, entry.Name()))
-		if err != nil {
-			log.Fatalf("Failed to read static process file: %v", err)
-		}
-		bt := new(btpb.BehaviorTree)
-		if err := proto.Unmarshal(f, bt); err != nil {
-			log.Fatalf("Failed to unmarshal process: %w", err)
-		}
-		processes[entry.Name()] = bt
-	}
-
 	// Read the `index.html` as a template. This is done specifically to allow
 	// writing a base URL to the HTML file at serve-time for better path
 	// resolution.
-	indexTemplate, err := template.ParseFiles(path.Join(filesRoot, indexFilePath))
+	indexTemplate, err := template.ParseFS(r, indexFilePath)
 	if err != nil {
 		log.Fatalf("Failed to parse index template: %v", err)
 	}
@@ -370,7 +380,7 @@ func main() {
 			// Create a gRPC client for the executive service.
 			cl: esvcgrpcpb.NewExecutiveServiceClient(conn),
 		},
-		processes: processes,
+		solutionClient: ssvcgrpcpb.NewSolutionServiceClient(conn),
 	}
 
 	if err := server.start(address); err != nil {

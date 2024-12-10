@@ -1,6 +1,6 @@
 load("@ai_intrinsic_sdks//bazel:skills.bzl", "cc_skill", "py_skill", "skill_manifest")
 load("@com_github_grpc_grpc//bazel:python_rules.bzl", "py_proto_library")
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 
 proto_library(
     name = "say_skill_proto",
@@ -86,4 +86,14 @@ cc_skill(
         ":say_skill_cc",
         ":say_skill_cc_proto",
     ]
+)
+
+cc_test(
+    name = "say_skill_cc_test",
+    srcs = ["say_skill_test.cc"],
+    deps = [
+        ":say_skill_cc",
+        "@ai_intrinsic_sdks//intrinsic/skills/testing:skill_test_utils_cc",
+        "@com_google_googletest//:gtest_main",
+    ],
 )

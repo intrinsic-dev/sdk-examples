@@ -1,0 +1,9 @@
+# proto-file: google/protobuf/any.proto
+# proto-message: Any
+[type.googleapis.com/configurable_service.ConfigurableServiceConfig] {
+    name: "Riley"
+    food: "carrots"
+    food: "cookies"
+    food: "cranberries"
+    seconds_to_sleep: 5
+  }

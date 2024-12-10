@@ -1,0 +1,25 @@
+metadata {
+    id {
+      package: "com.example"
+      name: "configurable_service"
+    }
+    vendor {
+      display_name: "Intrinsic"
+    }
+    documentation {
+      description: "A service that can be configured."
+    }
+    display_name: "Configurable Service"
+  }
+  service_def {
+    real_spec {
+      image {
+        archive_filename: "configurable_service_image.tar"
+      }
+    }
+    sim_spec {
+      image {
+        archive_filename: "configurable_service_image.tar"
+      }
+    }
+  }
