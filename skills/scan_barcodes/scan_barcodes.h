@@ -44,8 +44,8 @@ class ScanBarcodes : public intrinsic::skills::SkillInterface {
     std::unique_ptr<intrinsic_proto::perception::CameraServer::Stub>* camera_stub,
     std::string* camera_handle);
 
-  absl::StatusOr<intrinsic_proto::perception::Frame>
-  GrabFrame(
+  absl::StatusOr<intrinsic_proto::perception::CaptureResult>
+  CaptureImage(
     const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
     intrinsic_proto::perception::CameraServer::Stub* camera_stub,
     const std::string& camera_handle);

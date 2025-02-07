@@ -3,5 +3,4 @@ syntax = "proto3";
 package com.example;
 
 message StartStopwatchParams {
-  string text = 1;
 }

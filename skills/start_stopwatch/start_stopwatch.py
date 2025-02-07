@@ -1,4 +1,4 @@
-"""Contains the skill stop_stopwatch."""
+"""Contains the skill start_stopwatch."""
 
 from absl import logging
 
@@ -6,7 +6,7 @@ from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
 
-from services.stopwatch import stop_stopwatch_pb2
+from skills.start_stopwatch import start_stopwatch_pb2
 import grpc
 from intrinsic.util.grpc import connection
 from intrinsic.util.grpc import interceptor
@@ -35,23 +35,19 @@ def make_grpc_stub(resource_handle):
     )
 
 
-class StopStopwatch(skill_interface.Skill):
-    """Implementation of the stop_stopwatch skill."""
-
-    def __init__(self) -> None:
-        pass
+class StartStopwatch(skill_interface.Skill):
+    """Implementation of the start_stopwatch skill."""
 
     @overrides(skill_interface.Skill)
     def execute(
         self,
-        request: skill_interface.ExecuteRequest[stop_stopwatch_pb2.StopStopwatchParams],
+        request: skill_interface.ExecuteRequest[start_stopwatch_pb2.StartStopwatchParams],
         context: skill_interface.ExecuteContext
     ) -> None:
         stub = make_grpc_stub(context.resource_handles["stopwatch_service"])
 
-        logging.info("Stopping the stopwatch")
-        response = stub.Stop(stopwatch_proto.StopRequest())
+        response = stub.Start(stopwatch_proto.StartRequest())
         if response.success:
-            logging.info("Successfully stopped the stopwatch")
+            logging.info("Successfully started the stopwatch")
         else:
-            logging.error(f"Failed to stop the stopwatch: {response.error}")
+            logging.error(f"Failed to start the stopwatch: {response.error}")

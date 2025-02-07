@@ -88,11 +88,15 @@ absl::StatusOr<std::unique_ptr<google::protobuf::Message>> ScanBarcodes::Execute
     &camera_stub, &camera_handle));
 
   // Get a frame from the camera.
-  INTR_ASSIGN_OR_RETURN(intrinsic_proto::perception::Frame frame,
-    GrabFrame(camera_equipment.connection_info().grpc(), camera_stub.get(), camera_handle));
+  INTR_ASSIGN_OR_RETURN(intrinsic_proto::perception::CaptureResult capture_result,
+    CaptureImage(camera_equipment.connection_info().grpc(), camera_stub.get(), camera_handle));
+
+  if (capture_result.sensor_images().size() != 1) {
+    return absl::UnknownError("Expected camera to provide exactly 1 image");
+  }
 
   // Convert to cv::Mat.
-  auto image_buffer = frame.rgb8u();
+  auto image_buffer = capture_result.sensor_images().at(0).buffer();
 
   auto img = cv::Mat(
     image_buffer.dimensions().rows(),
@@ -158,8 +162,8 @@ ScanBarcodes::ConnectToCamera(
   return absl::OkStatus();
 }
 
-absl::StatusOr<intrinsic_proto::perception::Frame>
-ScanBarcodes::GrabFrame(
+absl::StatusOr<intrinsic_proto::perception::CaptureResult>
+ScanBarcodes::CaptureImage(
   const intrinsic_proto::resources::ResourceGrpcConnectionInfo& grpc_info,
   intrinsic_proto::perception::CameraServer::Stub* camera_stub,
   const std::string& camera_handle)
@@ -173,13 +177,13 @@ ScanBarcodes::GrabFrame(
     client_context->AddMetadata("x-resource-instance-name", camera_server_instance);
   }
 
-  intrinsic_proto::perception::GetFrameRequest frame_request;
-  frame_request.set_camera_handle(camera_handle);
-  frame_request.mutable_timeout()->set_seconds(5);
-  frame_request.mutable_post_processing()->set_skip_undistortion(false);
-  intrinsic_proto::perception::GetFrameResponse frame_response;
-  INTR_RETURN_IF_ERROR(intrinsic::ToAbslStatus(camera_stub->GetFrame(client_context.get(), frame_request, &frame_response)));
-  return std::move(*frame_response.mutable_frame());
+  intrinsic_proto::perception::CaptureRequest request;
+  request.set_camera_handle(camera_handle);
+  request.mutable_timeout()->set_seconds(5);
+  request.mutable_post_processing()->set_skip_undistortion(false);
+  intrinsic_proto::perception::CaptureResponse response;
+  INTR_RETURN_IF_ERROR(intrinsic::ToAbslStatus(camera_stub->Capture(client_context.get(), request, &response)));
+  return std::move(*response.mutable_capture_result());
 }
 
 absl::StatusOr<std::unique_ptr<ScanBarcodesResult>>
