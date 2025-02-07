@@ -1,0 +1,34 @@
+id {
+  package: "com.example"
+  name: "stop_stopwatch"
+}
+display_name: "StopStopwatch C++"
+vendor {
+  display_name: "Intrinsic"
+}
+documentation {
+  description: "Stops a stopwatch service and returns the time elapsed."
+}
+options {
+  supports_cancellation: false
+  cc_config {
+    create_skill: "skills::stop_stopwatch::StopStopwatch::CreateSkill"
+  }
+}
+dependencies {
+  required_equipment {
+    key: "stopwatch_service"
+    value {
+      capability_names: "stopwatch.StopwatchService"
+    }
+  }
+}
+parameter {
+  message_full_name: "com.example.StopStopwatchParams"
+  default_value {
+    type_url: "type.googleapis.com/com.example.StopStopwatchParams"
+  }
+}
+return_type {
+  message_full_name: "com.example.StopStopwatchResult"
+}

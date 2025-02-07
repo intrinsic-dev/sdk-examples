@@ -1,0 +1,7 @@
+schemaVersion: "2.0.0"
+
+fileExistenceTests:
+- name: 'Server binary'
+  path: '/services/hmi_python/server'
+  shouldExist: true
+  isExecutableBy: 'group'

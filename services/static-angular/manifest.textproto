@@ -1,0 +1,26 @@
+metadata {
+  id {
+    package: "hmi.angular"
+    name: "webserver"
+  }
+  vendor {
+    display_name: "Intrinsic"
+  }
+  documentation {
+    description: "A simple web server using Angular"
+  }
+  display_name: "Intrinsic examples"
+}
+service_def {
+  http_config: {}
+  real_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+  sim_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+}

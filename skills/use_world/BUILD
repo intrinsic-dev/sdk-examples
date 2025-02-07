@@ -93,3 +93,17 @@ cc_skill(
         ":use_world_cc_proto",
     ]
 )
+
+# Manually run integration test:
+#   bazel run //skills/use_world:use_world_integration_test -- --python
+# OR
+#   bazel run //skills/use_world:use_world_integration_test -- --cpp
+py_binary(
+    name = "use_world_integration_test",
+    srcs = ["use_world_integration_test.py"],
+    main = "use_world_integration_test.py",
+    deps = [
+        "@ai_intrinsic_sdks//intrinsic/solutions:behavior_tree",
+        "@ai_intrinsic_sdks//intrinsic/solutions:deployments",
+    ],
+)

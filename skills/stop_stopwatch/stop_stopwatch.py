@@ -1,4 +1,4 @@
-"""Contains the skill start_stopwatch."""
+"""Contains the skill stop_stopwatch."""
 
 from absl import logging
 
@@ -6,7 +6,7 @@ from intrinsic.skills.python import proto_utils
 from intrinsic.skills.python import skill_interface
 from intrinsic.util.decorators import overrides
 
-from services.stopwatch import start_stopwatch_pb2
+from skills.stop_stopwatch import stop_stopwatch_pb2
 import grpc
 from intrinsic.util.grpc import connection
 from intrinsic.util.grpc import interceptor
@@ -35,8 +35,8 @@ def make_grpc_stub(resource_handle):
     )
 
 
-class StartStopwatch(skill_interface.Skill):
-    """Implementation of the start_stopwatch skill."""
+class StopStopwatch(skill_interface.Skill):
+    """Implementation of the stop_stopwatch skill."""
 
     def __init__(self) -> None:
         pass
@@ -44,14 +44,16 @@ class StartStopwatch(skill_interface.Skill):
     @overrides(skill_interface.Skill)
     def execute(
         self,
-        request: skill_interface.ExecuteRequest[start_stopwatch_pb2.StartStopwatchParams],
+        request: skill_interface.ExecuteRequest[stop_stopwatch_pb2.StopStopwatchParams],
         context: skill_interface.ExecuteContext
-    ) -> None:
+    ) -> stop_stopwatch_pb2.StopStopwatchResult:
         stub = make_grpc_stub(context.resource_handles["stopwatch_service"])
 
-        logging.info("Starting the stopwatch")
-        response = stub.Start(stopwatch_proto.StartRequest())
-        if response.success:
-            logging.info("Successfully started the stopwatch")
-        else:
-            logging.error(f"Failed to start the stopwatch: {response.error}")
+        logging.info("Stopping the stopwatch")
+        response = stub.Stop(stopwatch_proto.StopRequest())
+        if not response.success:
+            raise skill_interface.SkillError(1, f"Failed to stop stopwatch {response.error}")
+
+        logging.info("Successfully stopped the stopwatch")
+        result = stop_stopwatch_pb2.StopStopwatchResult(time_elapsed=response.time_elapsed)
+        return result

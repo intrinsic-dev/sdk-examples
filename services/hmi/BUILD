@@ -1,4 +1,4 @@
-load("@ai_intrinsic_sdks//bazel:go_macros.bzl", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 load("@ai_intrinsic_sdks//intrinsic/assets/services/build_defs:services.bzl", "intrinsic_service")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@rules_pkg//:pkg.bzl", "pkg_tar")

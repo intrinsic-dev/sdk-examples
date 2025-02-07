@@ -2,19 +2,19 @@ id {
   package: "com.example"
   name: "stop_stopwatch"
 }
-display_name: "StopStopwatch"
+display_name: "StopStopwatch Python"
 vendor {
   display_name: "Unknown Vendor"
 }
 documentation {
-  description: "TODO: Describe what the skill does here."
+  description: "Stops a stopwatch service and returns the time elapsed."
 }
 options {
   supports_cancellation: false
   python_config {
-    skill_module: "services.stopwatch.stop_stopwatch"
-    proto_module: "services.stopwatch.stop_stopwatch_pb2"
-    create_skill: "services.stopwatch.stop_stopwatch.StopStopwatch"
+    skill_module: "skills.stop_stopwatch.stop_stopwatch"
+    proto_module: "skills.stop_stopwatch.stop_stopwatch_pb2"
+    create_skill: "skills.stop_stopwatch.stop_stopwatch.StopStopwatch"
   }
 }
 dependencies {
@@ -30,4 +30,7 @@ parameter {
   default_value {
     type_url: "type.googleapis.com/com.example.StopStopwatchParams"
   }
+}
+return_type {
+  message_full_name: "com.example.StopStopwatchResult"
 }

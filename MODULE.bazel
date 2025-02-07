@@ -3,7 +3,10 @@ module(name="examples")
 bazel_dep(name = "ai_intrinsic_sdks")
 archive_override(
     module_name = "ai_intrinsic_sdks",
-    urls = "https://github.com/intrinsic-ai/sdk/archive/refs/heads/main.tar.gz",
+    # To pin a version change the following to, e.g.:
+    #   urls = "https://github.com/intrinsic-ai/sdk/archive/refs/tags/intrinsic.platform.20221231.RC00.tar.gz",
+    #   strip_prefix = "sdk-intrinsic.platform.20221231.RC00/"
+    urls = ["https://github.com/intrinsic-ai/sdk/archive/refs/heads/main.tar.gz"],
     strip_prefix = "sdk-main/"
 )
 
@@ -17,12 +20,13 @@ bazel_dep(name = "platforms", version = "0.0.9")
 bazel_dep(name = "protobuf", version = "26.0.bcr.2", repo_name = "com_google_protobuf")
 bazel_dep(name = "rules_go", version = "0.49.0", repo_name = "io_bazel_rules_go")  # TODO Remove once we use a fix in rules_go
 bazel_dep(name = "rules_pkg", version = "1.0.1")
+bazel_dep(name = "rules_python", version = "1.0.0")
 
 # C++ toolchain
 bazel_dep(name = "toolchains_llvm", version = "1.1.2")
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
 llvm.toolchain(
-    llvm_version = "18.1.4",
+    llvm_version = "19.1.0",
 )
 non_module_deps = use_extension("@ai_intrinsic_sdks//bazel:non_module_deps.bzl", "non_module_deps_ext")
 use_repo(non_module_deps, "com_googleapis_storage_chrome_linux_amd64_sysroot")
@@ -72,9 +76,6 @@ use_repo(
 ##########
 # Python
 ##########
-
-bazel_dep(name = "rules_python", version = "0.31.0")
-
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 
 python.toolchain(
@@ -101,3 +102,10 @@ use_repo(pip, "stopwatch_pip_deps")
 ##########
 
 bazel_dep(name = "container_structure_test", version="1.19.1")
+
+##########
+# Non-bzlmod dependencies
+##########
+
+example_non_module_deps = use_extension("//bazel:non_module_deps.bzl", "non_module_deps_ext")
+use_repo(example_non_module_deps, "opencv")

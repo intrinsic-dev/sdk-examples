@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	indexFilePath = "examples/services/hmi/frontend/index.tml"
+	indexFilePath = "examples/services/hmi/frontend/index.html"
 
 	// defaultRuntimeContextPath is the well-known location for the runtime config
 	// inside on-prem devices.

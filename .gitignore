@@ -3,3 +3,4 @@ bazel-**
 .vscode/intrinsic/bazel-**
 .pybazel.env
 compile_commands.json
+MODULE.bazel.lock

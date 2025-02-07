@@ -1,0 +1,26 @@
+metadata {
+  id {
+    package: "com.example"
+    name: "hmi"
+  }
+  vendor {
+    display_name: "Intrinsic"
+  }
+  documentation {
+    description: "A simple HMI."
+  }
+  display_name: "HMI"
+}
+service_def {
+  http_config: {}
+  real_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+  sim_spec {
+    image {
+      archive_filename: "tarball.tar"
+    }
+  }
+}

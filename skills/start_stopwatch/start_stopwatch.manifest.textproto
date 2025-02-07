@@ -2,19 +2,19 @@ id {
   package: "com.example"
   name: "start_stopwatch"
 }
-display_name: "StartStopwatch"
+display_name: "Start Stopwatch"
 vendor {
-  display_name: "Unknown Vendor"
+  display_name: "Intrinsic"
 }
 documentation {
-  description: "TODO: Describe what the skill does here."
+  description: "Starts a stopwatch."
 }
 options {
   supports_cancellation: false
   python_config {
-    skill_module: "services.stopwatch.start_stopwatch"
-    proto_module: "services.stopwatch.start_stopwatch_pb2"
-    create_skill: "services.stopwatch.start_stopwatch.StartStopwatch"
+    skill_module: "skills.start_stopwatch.start_stopwatch"
+    proto_module: "skills.start_stopwatch.start_stopwatch_pb2"
+    create_skill: "skills.start_stopwatch.start_stopwatch.StartStopwatch"
   }
 }
 dependencies {
